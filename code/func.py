@@ -1,14 +1,14 @@
-def plt_hs(hs, min_fr=0.1):
+def plt_hs(hs, min_fr=0.1, figsize=(4,3), fig=None, ax=None):
     
     from matplotlib import pyplot as plt
     import numpy as np
 
     time_points, num_neurons = hs.shape[0], hs.shape[1]
     # Create subplots
-    fig, ax = plt.subplots(1, 1, figsize=(5, 4))
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Select neurons with mean firing rate > 0.1
-    mean_fr = hs.mean(axis=0)
+    mean_fr = hs.max(axis=0)
     # Get the index where mean_fr > min_fr
     mask = mean_fr > min_fr
     neuron_indices = np.where(mask)[0]
@@ -31,4 +31,6 @@ def plt_hs(hs, min_fr=0.1):
     ax.set_xlabel('Time Points')
     ax.set_ylabel('Neurons')
     plt.tight_layout()
-    return fig, ax
+    # Set y axis limit
+    # ax.set_ylim(300, 200)
+    return norm_hs, fig, ax

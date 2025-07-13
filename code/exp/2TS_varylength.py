@@ -1,5 +1,6 @@
 """The pure time task:
-The experiment synthesize two temporal events. The RNN is trained to predict the second event
+The experiment synthesize two temporal events with varied lengths. 
+The RNN is trained to predict the second event
 given the first event.
 """
 
@@ -12,6 +13,17 @@ from sklearn.model_selection import train_test_split
 # ===========================================================================================
 # Set up the arena and sensory input
 # ===========================================================================================
+
+# ------------------------------------------- #
+# Trial 0: (0.25, 0.75),  0.05                #
+# Trial 1: (0.2, 0.7),    0.1                 #
+# Trial 2: (0.15, 0.65),  0.2                 #
+# Trial 3: (0.1, 0.6),    0.3                 #
+# Trial 4: (0.05, 0.55),  0.4                 #
+# Trial 5: (0, 0.5),      0.5                 #
+# ------------------------------------------- #
+
+load_data_type = '2TS_vary5'
 
 temp_reso, spat_reso = 100, 1 # Temp reso: 100ms; Spatial reso: 1cm
 gym = RatatouGym(temporal_resolution=temp_reso, spatial_resolution=spat_reso)
@@ -34,11 +46,12 @@ sensory_profile = {
                             "n_cells":     100,
                             "mag":         1.0,
                             "mag_sigma":   0.5,
-                            'mag_func': lambda x: (x-1)**2 + 2,
+                            "mag_func":    lambda x : 0.3*x,
+                            # 'mag_func': lambda x: (x-1)**2 + 2,
                             # 'mag_func': lambda x: 4 *np.sin(x)/x+1,
-                            "event_onset": [0.25, 0.75],
-                            "event_width": [0.05, 0.05],
-                            "sigma":       0.2,    # sigma of Gaussian noise
+                            "event_onset": [0.,  0.5],
+                            "event_width": [0.5, 0.5],
+                            "sigma":       0.5,    # sigma of Gaussian noise
                             "ssigma":      0.1,    # sigma of Gaussian noise smoothing (in sec)
                             "bias":        0.
                             },
@@ -131,7 +144,7 @@ plt.legend()
 
 save_dir = f'data/'
 os.makedirs(save_dir, exist_ok=True)
-plt.savefig(f'{save_dir}/2TS_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
+plt.savefig(f'{save_dir}/{load_data_type}_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
 
 # ===========================================================================================
 # Save the sensory
@@ -146,5 +159,5 @@ save_dict = {
             'train_traj':   train_traj,
             'test_traj':    test_traj,
         }
-np.save(f'{save_dir}/2TS', save_dict)
+np.save(f'{save_dir}/{load_data_type}', save_dict)
 print('Saved!')

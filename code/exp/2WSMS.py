@@ -35,12 +35,12 @@ behavior_profile = {
 
 sensory_profile = {
                    "wsm": {
-                        "type":     "weak_sm_cell",
-                        "n_cells":   100,
-                        "sigma":     15,
-                        "magnitude": 4,
-                        "normalize": True
-                        },
+                          "type":     "weak_sm_cell",
+                          "n_cells":   100,
+                          "sigma":     15,
+                          "magnitude": 4,
+                          "normalize": True
+                          },
                     }
 
 # Set the sensory and behavior profiles
@@ -70,27 +70,26 @@ inputs = space_res.copy()
 # Mask the inputs
 from rtgym.utils.masking import Masking
 mask = Masking(
-                m_max=0.3,   # Maximum masking ratio
-                m_min=0.15,  # Minimum masking ratio
-                sigma_t=2.0, # Temporal smoothing
-                sigma_d=1.0, # Spatial smoothing
-                t_warmup=0,  # Number of initial time steps to remain unmasked
-               # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available
+                m_max=0.3,    # Maximum masking ratio
+                m_min=0.0,    # Minimum masking ratio
+                sigma_t=2.0,  # Temporal smoothing
+                sigma_d=1.0,  # Spatial smoothing
+                t_warmup=10,  # Number of initial time steps to remain unmasked
+                # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available
                 )
 inputs = mask.mask(inputs).numpy()
-# inputs[:, 50:, :] = 0  # Mask the second half of the trajectory
 
 # Split the data to training and test set along axis=1
 indices = np.arange(inputs.shape[0])
 train_inputs, test_inputs, train_labels, test_labels, train_indices, \
 test_indices = train_test_split(inputs, labels, indices, test_size=0.05, random_state=42)
 
-print('train_inputs:', train_inputs.shape)
-print('train_labels:', train_labels.shape)
-print('test_inputs:', test_inputs.shape)
-print('test_labels:', test_labels.shape)
+print('train_inputs:',  train_inputs.shape)
+print('train_labels:',  train_labels.shape)
+print('test_inputs:',   test_inputs.shape)
+print('test_labels:',   test_labels.shape)
 print('train_indices:', train_indices.shape)
-print('test_indices:', test_indices.shape)
+print('test_indices:',  test_indices.shape)
 
 train_traj, test_traj = {}, {}
 for key, val in traj.items():
@@ -132,13 +131,13 @@ plt.savefig(f'{save_dir}/2WSMS_sensory_{plot_batch_idx}.png', dpi=300, bbox_inch
 # ===========================================================================================
 
 save_dict = {
-    'train_inputs': train_inputs,
-    'train_labels': train_labels,
-    'test_inputs':  test_inputs,
-    'test_labels':  test_labels,
-    'arena_map':    arena_map,
-    'train_traj':   train_traj,
-    'test_traj':    test_traj,
-}
+            'train_inputs': train_inputs,
+            'train_labels': train_labels,
+            'test_inputs':  test_inputs,
+            'test_labels':  test_labels,
+            'arena_map':    arena_map,
+            'train_traj':   train_traj,
+            'test_traj':    test_traj,
+        }
 np.save(f'{save_dir}/2WSMS', save_dict)
 print('Saved!')
