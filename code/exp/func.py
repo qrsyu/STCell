@@ -1,8 +1,8 @@
-from scipy.ndimage import distance_transform_edt
 def generate_circular_trajectories(arena_map, R_out, R_in,
                                     mean_vel, std_vel, # Angular veloity
                                     time_points=100, batch_size=1, visualize=True):
     import numpy as np
+    from matplotlib import pyplot as plt
     
     dim = arena_map.shape[0]
     y_c, x_c = int(dim/2), int(dim/2)

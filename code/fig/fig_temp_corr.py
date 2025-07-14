@@ -4,25 +4,30 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 
 
-load_data_type = '2WSMS_mask_vary'
+load_data_type = '2TS2WSMS_'
 load_dir = f'data/'
 
-colours = ['#274753', '#297270', '#299D8F', '#8AB07C',  '#E7C66B', '#F3A361']
-corr_starts = [5, 4.5, 4, 3.5, 3, 2.5]
-corr_ends =   [5, 5.5, 6, 6.5, 7, 7.5]
-# corr_starts = [0, 0.5, 1, 1.5, 2, 2.5]
-# corr_ends =   [10, 9.5, 9, 8.5, 8, 7.5]
+colours = [# '#274753', 
+           '#297270', '#299D8F', '#8AB07C',  '#E7C66B', '#F3A361']
+
+# # Fig 3
+# corr_starts = [5, 4.5, 4, 3.5, 3, 2.5]
+# corr_ends =   [5, 5.5, 6, 6.5, 7, 7.5]
+# Fig 4
+corr_starts = [2.5] * 5
+corr_ends =   [6.5] * 5
+
 
 fig, axs = plt.subplots(figsize=(9, 10), constrained_layout=True)
 
-gs = gridspec.GridSpec(6, 1, figure=fig, hspace=0)
-for i in range(6):
+gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0)
+for idx, i in enumerate([2, 3, 4, 5, 6]):
     data = np.load(f'{load_dir}/{load_data_type}{i}.npy', allow_pickle=True).item()
 
     hs = data['hidden_states_512']
     avg_hs = np.mean(hs, axis=0)
     
-    ax = fig.add_subplot(gs[i, 0])
+    ax = fig.add_subplot(gs[idx, 0])
     
     ax.set_yticks(np.linspace(0, 100, 5))
     ax.set_ylabel('Firing width (s)')
@@ -45,23 +50,23 @@ for i in range(6):
         # firing_widths[j] = np.sum(avg_hs[:, j] > 0.1 * np.max(avg_hs[:, j]))
     
     # Set the scatter points with corr starts and ends wiyth alpha=1, and others with alpha=0.5
-    plt.scatter(max_times[max_times < corr_starts[i]], 
-                firing_widths[max_times < corr_starts[i]],
-                c=colours[i], s=10, alpha=0.3)
-    plt.scatter(max_times[(max_times >= corr_starts[i]) & (max_times <= corr_ends[i])], 
-                firing_widths[(max_times >= corr_starts[i]) & (max_times <= corr_ends[i])],
-                c=colours[i], s=10, alpha=1)
-    plt.scatter(max_times[max_times > corr_ends[i]], 
-                firing_widths[max_times > corr_ends[i]],
-                c=colours[i], s=10, alpha=0.3)
+    plt.scatter(max_times[max_times < corr_starts[idx]], 
+                firing_widths[max_times < corr_starts[idx]],
+                c=colours[idx], s=10, alpha=0.3)
+    plt.scatter(max_times[(max_times >= corr_starts[idx]) & (max_times <= corr_ends[idx])], 
+                firing_widths[(max_times >= corr_starts[idx]) & (max_times <= corr_ends[idx])],
+                c=colours[idx], s=10, alpha=1)
+    plt.scatter(max_times[max_times > corr_ends[idx]], 
+                firing_widths[max_times > corr_ends[idx]],
+                c=colours[idx], s=10, alpha=0.3)
     # plt.scatter(max_times, firing_widths, c=colours[i], s=10)
 
     # use seaborn to plot the correlation of red dots with shaded area
-    rval = np.corrcoef(max_times[(max_times >= corr_starts[i]) & (max_times < corr_ends[i])], 
-                       firing_widths[(max_times >= corr_starts[i]) & (max_times < corr_ends[i])])[0,1]
+    rval = np.corrcoef(max_times[(max_times >= corr_starts[idx]) & (max_times < corr_ends[idx])], 
+                       firing_widths[(max_times >= corr_starts[idx]) & (max_times < corr_ends[idx])])[0,1]
     print(f'Correlation coefficient: {rval}')
-    sns.regplot(x=max_times[(max_times >= corr_starts[i]) & (max_times < corr_ends[i])], 
-                y=firing_widths[(max_times >= corr_starts[i]) & (max_times < corr_ends[i])],
+    sns.regplot(x=max_times[(max_times >= corr_starts[idx]) & (max_times < corr_ends[idx])], 
+                y=firing_widths[(max_times >= corr_starts[idx]) & (max_times < corr_ends[idx])],
                 scatter=False, 
                 color='black',
                 line_kws={"linewidth":1, "linestyle":"-"},

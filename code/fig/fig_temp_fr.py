@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 
 
-load_data_type = '2TS_vary'
+load_data_type = '2TS2WSMS_'
 load_dir = f'data/'
 
 
@@ -45,8 +45,8 @@ def plt_hs(hs, min_fr=0.1, fig=None, ax=None, figsize=(4,3)):
 
 fig, axs = plt.subplots(figsize=(9, 10), constrained_layout=True)
 
-gs = gridspec.GridSpec(6, 1, figure=fig, hspace=0)
-for i in range(6):
+gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0)
+for idx, i in enumerate([2, 3, 4, 5, 6]):
     data = np.load(f'{load_dir}/{load_data_type}{i}.npy', allow_pickle=True).item()
     hs = data['hidden_states_512']
     avg_hs = np.mean(hs, axis=0)
@@ -57,7 +57,7 @@ for i in range(6):
     #     avg_hs = avg_hs[:, :-50]
     
     
-    ax = fig.add_subplot(gs[i, 0])
+    ax = fig.add_subplot(gs[idx, 0])
     norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax, )
     # ax.set_yticks([])
     ax.set_ylabel('Neurons')
