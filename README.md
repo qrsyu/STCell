@@ -11,4 +11,5 @@ The investigation of time cell and place cell unification in the hippocampus CA3
 
 - [x] *July 13*: add figure and 2 and 3 to Overleaf.
 - [ ] I want to add one more subfigure about the spatial analysis in figure 3. It should tell people how much spatial information is encoded in each case. But I haven't found a proper subfigure design.
-- [ ] Add main content of figure 4 and 5 (*due July 16*)
+- [x] *July 15*: Add main content of figure 4.
+- [ ] Add main content of figure 5 (*due July 16*)

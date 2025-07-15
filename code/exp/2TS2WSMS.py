@@ -8,7 +8,22 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from func import generate_circular_trajectories
 
-load_data_type = '2TS2WSMS_6'
+load_data_type = '2TS2WSMS_10'
+
+####################################
+# trial        time         space  #
+# 0            100          0      #
+# 1             98          2      #
+# 2             96          4      #
+# 3             90          10     #
+# 8             80          20
+# 9             60          40
+# 4             50          50     #
+# 10            40          60
+# 7             20          80
+# 5             10          90     #
+# 6              4          96     #   
+####################################
 
 # ===========================================================================================
 # Set up the arena and sensory input
@@ -35,14 +50,14 @@ behavior_profile = {
 sensory_profile = {
                    "wsm": {
                           "type":     "weak_sm_cell",
-                          "n_cells":   96,
+                          "n_cells":   60,
                           "sigma":     15,
                           "magnitude": 4,
                           "normalize": True
                           },
                    "time": {
                             "type":        "time_cell",
-                            "n_cells":     4,
+                            "n_cells":     40,
                             "mag":         0.5,
                             "mag_sigma":   0.5,
                             # 'mag_func': lambda x: (x-1)**2 + 2,

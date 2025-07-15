@@ -12,7 +12,7 @@ rows = [
 colours = [# '#274753', 
            '#297270', '#299D8F', '#8AB07C',  '#E7C66B', '#F3A361']
 
-fig, ax = plt.subplots(figsize=(5, 4))
+fig, ax = plt.subplots(figsize=(4, 3))
 
 yticks = []
 yticklabels = []
