@@ -37,10 +37,10 @@ model_cfg = {
             "input_dim":    train_inputs.shape[2],
             "hidden_dim":   args.num_neuron,
             'output_dim':   train_inputs.shape[2],
-            "alpha":        0.1,
+            "alpha":        0.03,
             "learn_alpha":  False,
-            "preact_noise": 0.,
-            "postact_noise":0.
+            "preact_noise": 0.3,
+            "postact_noise":0.3
             }
 
 
@@ -121,7 +121,7 @@ losses = []
 # 2WSMS_mask_vary: 1, 0.0001         #
 # ---------------------------------- #
 
-for epoch in tqdm(range(5000)):
+for epoch in tqdm(range(10000)):
 
     for batch_inputs, batch_labels in train_loader:
         
@@ -136,9 +136,9 @@ for epoch in tqdm(range(5000)):
         optimizer.step()
         losses.append(loss.item())
         
-    if epoch % 50 == 0:
+    if epoch % 100 == 0:
         print(f'Epoch {epoch} Loss {loss.item()}')
-    if len(losses) > 50 and abs(losses[-1] - losses[-50]) < 1e-4 and losses[-1] < 1:
+    if losses[-1] < 0.1: #len(losses) > 50 and abs(losses[-1] - losses[-50]) < 1e-4 and :
         print("Early stopping due to convergence.")
         break
     
@@ -152,7 +152,7 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.yscale('log')  
 plt.tight_layout()
-plt.savefig(f'{load_dir}/{args.load_data_type}_loss_{model_cfg["hidden_dim"]}')
+plt.savefig(f'{load_dir}/fig_loss/{args.load_data_type}_loss_{model_cfg["hidden_dim"]}')
 
 data[f'loss_{model_cfg["hidden_dim"]}'] = losses
 

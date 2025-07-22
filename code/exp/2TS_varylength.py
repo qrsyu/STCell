@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 # Trial 5: (0, 0.5),      0.5                 #
 # ------------------------------------------- #
 
-load_data_type = '2TS_vary5'
+load_data_type = '2TS_vary0'
 
 temp_reso, spat_reso = 100, 1 # Temp reso: 100ms; Spatial reso: 1cm
 gym = RatatouGym(temporal_resolution=temp_reso, spatial_resolution=spat_reso)
@@ -40,19 +40,28 @@ behavior_profile = {
                     "switch_velocity_prob":   0.1
                     }
 
+# Generate the first temporal event with shape n_cells, Select fixed random number from a normal distribution
+n_cells = 100
+# I need the value to be fixed
+np.random.seed(42)  # For reproducibility
+temp_event_1 = np.random.normal(loc=4.0, scale=0.5, size=(n_cells,))
+temp_event_2 = np.random.normal(loc=5.0, scale=1.0, size=(n_cells,))
+
 sensory_profile = {
                     "time": {
                             "type":        "time_cell",
-                            "n_cells":     100,
-                            "mag":         1.0,
-                            "mag_sigma":   0.5,
-                            "mag_func":    lambda x : 0.3*x,
+                            "n_cells":     n_cells,
+                            # "mag":         1.0,
+                            # "mag_sigma":   0.5,
+                            # "mag_func":    lambda x : 0.3*x,
                             # 'mag_func': lambda x: (x-1)**2 + 2,
                             # 'mag_func': lambda x: 4 *np.sin(x)/x+1,
-                            "event_onset": [0.,  0.5],
-                            "event_width": [0.5, 0.5],
+                            "event_onset": [0.25, 0.75],
+                            "event_width": [0.05, 0.05],
+                            "event_onset_sigma": [0.01, 0.01],
+                            "temp_events": [temp_event_1, temp_event_2], 
                             "sigma":       0.5,    # sigma of Gaussian noise
-                            "ssigma":      0.1,    # sigma of Gaussian noise smoothing (in sec)
+                            "ssigma":      0.2,    # sigma of Gaussian noise smoothing (in sec)
                             "bias":        0.
                             },
                     }
@@ -97,7 +106,10 @@ mask = Masking(
                 # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available
                 )
 inputs = mask.mask(inputs).numpy()
-inputs[:, int(inputs.shape[1]*(sensory_profile['time']['event_onset'][0]+sensory_profile['time']['event_width'][0])):, :] = 0
+mask_start_idx = int(inputs.shape[1]*(sensory_profile['time']['event_onset'][0]+\
+                                      sensory_profile['time']['event_width'][0]+\
+                                      sensory_profile['time']['event_onset_sigma'][0]))
+inputs[:, mask_start_idx:, :] = 0
 
 # Split the data to training and test set along axis=1
 indices = np.arange(inputs.shape[0])

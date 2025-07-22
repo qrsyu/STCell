@@ -4,24 +4,24 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 
 
-load_data_type = '2TS2WSMS_'
+load_data_type = '2WSMS_mask_vary'
 load_dir = f'data/'
 
-colours = [# '#274753', 
+colours = [ '#274753', 
            '#297270', '#299D8F', '#8AB07C',  '#E7C66B', '#F3A361']
 
 # # Fig 3
-# corr_starts = [5, 4.5, 4, 3.5, 3, 2.5]
-# corr_ends =   [5, 5.5, 6, 6.5, 7, 7.5]
+corr_starts = [5, 4.5, 4, 3.5, 3, 2.5]
+corr_ends =   [5, 5.5, 6, 6.5, 7, 7.5]
 # Fig 4
-corr_starts = [2.5] * 5
-corr_ends =   [6.5] * 5
+# corr_starts = [2.5] * 5
+# corr_ends =   [6.5] * 5
 
 
 fig, axs = plt.subplots(figsize=(9, 10), constrained_layout=True)
 
-gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0)
-for idx, i in enumerate([2, 3, 4, 5, 6]):
+gs = gridspec.GridSpec(6, 1, figure=fig, hspace=0)
+for idx, i in enumerate(range(6)):
     data = np.load(f'{load_dir}/{load_data_type}{i}.npy', allow_pickle=True).item()
 
     hs = data['hidden_states_512']
@@ -43,11 +43,14 @@ for idx, i in enumerate([2, 3, 4, 5, 6]):
     avg_hs = avg_hs[:, sort_indices]
     max_times = max_times[sort_indices]
     max_times = max_times / 10
+    
+    # Normalize the hs along time points (Sure to be correct!)
+    norm_hs = avg_hs / np.linalg.norm(avg_hs, axis=0, keepdims=True)
 
-    firing_widths = np.zeros(avg_hs.shape[1])
-    for j in range(avg_hs.shape[1]):
-        firing_widths[j] = np.sum(avg_hs[:, j] > 1E-1)
-        # firing_widths[j] = np.sum(avg_hs[:, j] > 0.1 * np.max(avg_hs[:, j]))
+    firing_widths = np.zeros(norm_hs.shape[1])
+    for j in range(norm_hs.shape[1]):
+        # firing_widths[j] = np.sum(norm_hs[:, j] > 1E-1)
+        firing_widths[j] = np.sum(avg_hs[:, j] > 0.1 * np.max(norm_hs[:, j]))
     
     # Set the scatter points with corr starts and ends wiyth alpha=1, and others with alpha=0.5
     plt.scatter(max_times[max_times < corr_starts[idx]], 

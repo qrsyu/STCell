@@ -8,7 +8,11 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from func import generate_circular_trajectories
 
-load_data_type = '2TS2WSMS_10'
+chose_idx = 10
+n_times = [98, 96, 90, 80, 60, 50, 40, 20, 10, 4, 2]
+
+load_data_type = f'2TS2WSMS_vary{n_times[chose_idx]}'
+
 
 ####################################
 # trial        time         space  #
@@ -47,25 +51,36 @@ behavior_profile = {
                     'avoid_boundary_dist': 60
                     }
 
+# Generate the first temporal event with shape n_cells, Select fixed random number from a normal distribution
+n_time_cells = n_times[chose_idx]
+n_space_cells = 100-n_time_cells
+# I need the value to be fixed
+np.random.seed(42)  # For reproducibility
+temp_event_1 = np.random.normal(loc=4.0, scale=0.5, size=(n_time_cells,))
+temp_event_2 = np.random.normal(loc=5.0, scale=1.0, size=(n_time_cells,))
+
+
 sensory_profile = {
                    "wsm": {
                           "type":     "weak_sm_cell",
-                          "n_cells":   60,
+                          "n_cells":   n_space_cells,
                           "sigma":     15,
                           "magnitude": 4,
                           "normalize": True
                           },
                    "time": {
                             "type":        "time_cell",
-                            "n_cells":     40,
-                            "mag":         0.5,
-                            "mag_sigma":   0.5,
+                            "n_cells":     n_time_cells,
+                            # "mag":         0.5,
+                            # "mag_sigma":   0.5,
                             # 'mag_func': lambda x: (x-1)**2 + 2,
                             # 'mag_func': lambda x: 4 *np.sin(x)/x+1,
                             "event_onset": [0.25, 0.75],
+                            "event_onset_sigma": [0.01, 0.01],
                             "event_width": [0.05, 0.05],
-                            "sigma":       0.2,    # sigma of Gaussian noise
-                            "ssigma":      0.1,    # sigma of Gaussian noise smoothing (in sec)
+                            "temp_events": [temp_event_1, temp_event_2], 
+                            "sigma":       0.5,    # sigma of Gaussian noise
+                            "ssigma":      0.2,    # sigma of Gaussian noise smoothing (in sec)
                             "bias":        0.
                             },
                     }
@@ -106,7 +121,10 @@ print(traj.keys())
 
 time_labels = time_res.copy()
 time_inputs = time_res.copy()
-time_inputs[:, int(time_inputs.shape[1]*(sensory_profile['time']['event_onset'][0]+sensory_profile['time']['event_width'][0])):, :] = 0
+mask_start_idx = int(time_inputs.shape[1]*(sensory_profile['time']['event_onset'][0]+\
+                                      sensory_profile['time']['event_width'][0]+\
+                                      sensory_profile['time']['event_onset_sigma'][0]))
+time_inputs[:, mask_start_idx:, :] = 0
 
 space_labels = space_res.copy()
 space_inputs = space_res.copy()
@@ -129,7 +147,6 @@ mask = Masking(
                 # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available
                 )
 inputs = mask.mask(inputs).numpy()
-# inputs[:, int(inputs.shape[1]*(sensory_profile['time']['event_onset'][0]+sensory_profile['time']['event_width'][0])):, :] = 0
 
 # Split the data to training and test set along axis=1
 indices = np.arange(inputs.shape[0])
@@ -181,7 +198,7 @@ axs[1].set_xlabel('Time (ms)')
 # axs[1].plot(labels[plot_batch_idx, :, -1], label='Label Channel 100')
 # plt.legend()
 
-save_dir = f'data/'
+save_dir = f'data/fig/'
 os.makedirs(save_dir, exist_ok=True)
 plt.savefig(f'{save_dir}/{load_data_type}_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
 
@@ -198,5 +215,5 @@ save_dict = {
             'train_traj':   train_traj,
             'test_traj':    test_traj,
         }
-np.save(f'{save_dir}/{load_data_type}', save_dict)
+np.save(f'data/{load_data_type}', save_dict)
 print('Saved!')

@@ -3,11 +3,9 @@ import numpy as np
 from tqdm import tqdm
 
 
-def plt_hs(hs, min_fr=0.1, figsize=(4,3), fig=None, ax=None):
+def plt_hs(hs, min_fr=0.1, fig=None, ax=None):
 
     time_points, num_neurons = hs.shape[0], hs.shape[1]
-    # Create subplots
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Select neurons with mean firing rate > 0.1
     mean_fr = hs.max(axis=0)
@@ -18,23 +16,35 @@ def plt_hs(hs, min_fr=0.1, figsize=(4,3), fig=None, ax=None):
     del hs
 
     # Normalize the hs along time points (Sure to be correct!)
-    norm_hs = select_hs / np.linalg.norm(select_hs, axis=0, keepdims=True)
+    # norm_hs = select_hs / np.linalg.norm(select_hs, axis=0, keepdims=True)
+    # 0-1 Normalise method 2
+    norm_hs = np.zeros_like(select_hs)
+    for n in range(select_hs.shape[1]):
+        norm_hs[:, n] = (select_hs[:, n]-np.min(select_hs[:, n]))/(np.max(select_hs[:, n])-np.min(select_hs[:, n]))
     del select_hs
     
     # Sort neurons from maximum firing time
     max_time = np.argmax(norm_hs, axis=0)
     sorted_neuron_indices = np.argsort(max_time)
     norm_hs = norm_hs[:, sorted_neuron_indices]
-
+    
     # Plot the normalized hs
-    x_ticks = np.arange(0, time_points)
-    ax.imshow(norm_hs.T, aspect='auto', cmap='jet', # extent=[x_ticks[0], x_ticks[-1], 0, norm_hs.shape[1]]
+    # x_ticks = np.arange(0, time_points)
+    ax.imshow(norm_hs.T, aspect='auto', cmap='jet',  extent=[0, 10, 0, norm_hs.shape[1]]
               )
     ax.set_xlabel('Time Points')
     ax.set_ylabel('Neurons')
-    plt.tight_layout()
+    
+    # Set x axis limit
+    # ax.set_xlim(25, 130)
     # Set y axis limit
     # ax.set_ylim(300, 200)
+    
+    # # Plot colorbar
+    # cbar = plt.colorbar(mappable=plt.cm.ScalarMappable(cmap='jet'), ax=ax)
+    # cbar.set_label('Normalized Firing Rate')
+    
+    # plt.tight_layout()
     return norm_hs, fig, ax
 
 
