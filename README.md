@@ -13,3 +13,13 @@ The investigation of time cell and place cell unification in the hippocampus CA3
 - [ ] I want to add one more subfigure about the spatial analysis in figure 3. It should tell people how much spatial information is encoded in each case. But I haven't found a proper subfigure design.
 - [x] *July 15*: Add main content of figure 4.
 - [ ] Add main content of figure 5 (*due July 16*)
+
+**July 16**
+- [ ] Check how the experimental data report the time cells change over time
+- [ ] https://www.bu.edu/psych/profile/marc-howard-ph-d/, theoretical papers about time cells.
+- [ ] Find better parameters for the first (time cell) experiment.
+  - [ ] Adjust the interval between two temporal events to see if the time cells can be widened further.
+  - [ ] Try to increase the trial duration from 5s to 10s? Use `torch.grad_clip`
+  - [ ] Worst case, try GRU/LSTM first. Worst-case use State Space Model.
+- [ ] For parameter search (https://hydra.cc/docs/intro/)
+- [ ] Get some ideas on how to frame a qualitative explanation of the time cells.
