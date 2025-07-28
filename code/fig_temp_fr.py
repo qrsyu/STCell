@@ -3,74 +3,43 @@ from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
 from func import plt_hs
 
-load_data_type = '2WSMS_mask_vary'
+
+load_data_types = ['2TS2WSMS_vary2',# '2TS2WSMS_vary4', 
+                   '2TS2WSMS_vary10', #'2TS2WSMS_vary40', 
+                   '2TS2WSMS_vary50', #'2TS2WSMS_vary60', '2TS2WSMS_vary80', 
+                   '2TS2WSMS_vary90', 
+                   #'2TS2WSMS_vary96',
+                   '2TS2WSMS_vary98']
+
+# load_data_types = ['2TS_vary0', '2TS_vary1','2TS_vary2', 
+#                    '2TS_vary3', '2TS_vary4','2TS_vary5',]
+
+# load_data_types = ['2WSMS_mask_vary0', '2WSMS_mask_vary1','2WSMS_mask_vary2', 
+#                    '2WSMS_mask_vary3', '2WSMS_mask_vary4','2WSMS_mask_vary5',]
+
 load_dir = f'data/'
 
 
-# def plt_hs(hs, min_fr=0.1, fig=None, ax=None, figsize=(4,3)):
-    
-#     from matplotlib import pyplot as plt
-#     import numpy as np
+fig, axs = plt.subplots(figsize=(10, len(load_data_types)*2), constrained_layout=True)
 
-#     time_points, num_neurons = hs.shape[0], hs.shape[1]
-
-#     # Select neurons with max firing rate > 0.1
-#     max_fr = hs.max(axis=0)
-#     # Get the index where max_fr > min_fr
-#     mask = max_fr > min_fr
-#     neuron_indices = np.where(mask)[0]
-#     select_hs = hs[:, neuron_indices]
-#     del hs
-
-#     # Normalize the hs along time points (Sure to be correct!)
-#     norm_hs = select_hs / np.linalg.norm(select_hs, axis=0, keepdims=True)
-#     del select_hs
-    
-#     # Sort neurons from maximum firing time
-#     max_time = np.argmax(norm_hs, axis=0)
-#     sorted_neuron_indices = np.argsort(max_time)
-#     norm_hs = norm_hs[:, sorted_neuron_indices]
-
-#     # Plot the normalized hs
-#     # x_ticks = np.arange(0, time_points)
-#     ax.imshow(norm_hs.T, aspect='auto', cmap='jet', extent=[0, 10, 0, 100]
-#               )
-#     # ax.set_xlabel('Time Points')
-#     # ax.set_ylabel('Neurons')
-#     # plt.tight_layout()
-#     # Set y axis limit
-#     # ax.set_ylim(300, 200)
-#     return norm_hs, fig, ax
-
-
-fig, axs = plt.subplots(figsize=(9, 10), constrained_layout=True)
-
-gs = gridspec.GridSpec(6, 1, figure=fig, hspace=0.01)
-for idx, i in enumerate(range(6)):
-    print(f'{load_dir}/{load_data_type}{i}.npy')
-    data = np.load(f'{load_dir}/{load_data_type}{i}.npy', allow_pickle=True).item()
+gs = gridspec.GridSpec(len(load_data_types), 1, figure=fig, hspace=0.01)
+for idx, item in enumerate(load_data_types):
+    data = np.load(f'{load_dir}/{item}.npy', allow_pickle=True).item()
     hs = data['hidden_states_512']
     avg_hs = np.mean(hs, axis=0)
-    
-    
-    # # Remove the first 50 neurons
-    # if i in [1, 2, 3, 4]:
-    #     avg_hs = avg_hs[:, :-50]
+    warmup, end = 10, avg_hs.shape[0]
     
     
     ax = fig.add_subplot(gs[idx, 0])
-    norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax,)
-    # ax.set_yticks([])
-    ax.set_ylabel('Neurons')
-    # ax.set_xticks([])
-    if i < 5:
+    norm_hs, fig, ax = plt_hs(avg_hs[warmup:end], min_fr=0.1, fig=fig, ax=ax,)
+    if idx < len(load_data_types)-1:
         ax.set_xticks([])
-        ax.set_xlabel("")
+        # ax.set_xlabel("")
     else:
-        ax.set_xlabel("Time (s)")
-        ax.set_xticks(np.linspace(0, 10, 11))
+        ax.set_xlabel("Time (s)", fontsize=12)
+        # ax.set_xticks(np.linspace(0, 10, 11))
 
 fig.delaxes(fig.get_axes()[0])
 
 # plt.tight_layout()
-plt.savefig(f'output/fig_temp_fr_{load_data_type}')
+plt.savefig(f'output/fig_temp_fr_{load_data_types[0][:-1]}')

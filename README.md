@@ -17,9 +17,9 @@ The investigation of time cell and place cell unification in the hippocampus CA3
 **July 16**
 - [ ] Check how the experimental data report the time cells change over time
 - [ ] https://www.bu.edu/psych/profile/marc-howard-ph-d/, theoretical papers about time cells.
-- [ ] Find better parameters for the first (time cell) experiment.
+- [x] Find better parameters for the first (time cell) experiment.
   - [ ] Adjust the interval between two temporal events to see if the time cells can be widened further.
-  - [ ] Try to increase the trial duration from 5s to 10s? Use `torch.grad_clip`
+  - [x] Try to increase the trial duration from 5s to 15s? Use `torch.grad_clip`
   - [ ] Worst case, try GRU/LSTM first. Worst-case use State Space Model.
 - [ ] For parameter search (https://hydra.cc/docs/intro/)
 - [ ] Get some ideas on how to frame a qualitative explanation of the time cells.

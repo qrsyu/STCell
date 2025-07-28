@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 import numpy as np
 import argparse
+import os
 
 # Input arguments
 parser = argparse.ArgumentParser()
@@ -24,9 +25,13 @@ data = np.load(f'{load_dir}/{args.load_data_type}.npy', allow_pickle=True).item(
 train_inputs = torch.tensor(data['train_inputs'], dtype=torch.float32).to(device)
 train_labels = torch.tensor(data['train_labels'], dtype=torch.float32).to(device)
 
+# Only use a subset of the data for training
+train_inputs = train_inputs[:64]
+train_labels = train_labels[:64]
+
 # Create DataLoader for training and testing
 train_dataset = TensorDataset(train_inputs, train_labels)
-train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
 # ===========================================================================================
 # Initialise the RNN
@@ -104,7 +109,6 @@ def custom_loss(recon, target, firing_rates, lambda_mse, lambda_r):
 
 
 optimizer = torch.optim.Adam(rnn.parameters(), lr=0.0005) 
-# criterion = torch.nn.MSELoss()
 
 # ===========================================================================================
 # Train the RNN
@@ -138,7 +142,7 @@ for epoch in tqdm(range(10000)):
         
     if epoch % 100 == 0:
         print(f'Epoch {epoch} Loss {loss.item()}')
-    if losses[-1] < 0.1: #len(losses) > 50 and abs(losses[-1] - losses[-50]) < 1e-4 and :
+    if losses[-1] < 0.1 and abs(losses[-1] - losses[-50]) < 1e-4: #len(losses) > 50 and  and :
         print("Early stopping due to convergence.")
         break
     
@@ -180,3 +184,11 @@ data[f'test_outputs_{model_cfg["hidden_dim"]}'] = test_outputs
 data[f'hidden_states_{model_cfg["hidden_dim"]}'] = hidden_states
 print(data.keys())
 np.save(f'{load_dir}/{args.load_data_type}.npy', data, allow_pickle=True)
+
+# ===========================================================================================
+# Save the RNN model
+# ===========================================================================================
+
+model_dir = f'{load_dir}/rnn_model/'
+os.makedirs(model_dir, exist_ok=True)
+torch.save(rnn.state_dict(), f'{model_dir}/{args.load_data_type}_{model_cfg["hidden_dim"]}.pth')
