@@ -30,7 +30,6 @@ behavior_profile = {
 
 # Generate the first temporal event with shape n_cells, Select fixed random number from a normal distribution
 n_cells = 100
-# I need the value to be fixed
 np.random.seed(42)  # For reproducibility
 temp_event_1 = np.random.normal(loc=4.0, scale=0.5, size=(n_cells,))
 temp_event_2 = np.random.normal(loc=5.0, scale=1.0, size=(n_cells,))
@@ -39,10 +38,6 @@ sensory_profile = {
                     "time": {
                             "type":        "time_cell",
                             "n_cells":     n_cells,
-                            # "mag":         1.0,
-                            # "mag_sigma":   0.5,
-                            # 'mag_func': lambda x: (x-1)**2 + 2,
-                            # 'mag_func': lambda x: 4 *np.sin(x)/x+1,
                             "event_onset": [0.125, 0.875],
                             "event_onset_sigma": [0.01, 0.01],
                             "event_width": [0.025, 0.025],

@@ -4,17 +4,23 @@ from func import plt_hs, plt_temp_corr
 
 
 
-load_data_type = '2WSMS_mask'
-num_neuron = 64
+load_data_type = 'STcorr'
+num_neuron = 512
 
 
 load_dir = f'data/'
 data = np.load(f'{load_dir}/{load_data_type}.npy', allow_pickle=True).item()
 hs = data[f'hidden_states_{num_neuron}']
-# If place cell, select batch
-# avg_hs = np.mean(hs, axis=0)
+# If place cell, STcorr, select batch
+# -----------------------------
+test_traj = data['test_traj']
+select_batch = np.where(np.all(test_traj['coords'][:, int(20*10*0.75):int(20*10*0.8), 1] > 100, 
+                               axis=1))[0]
+print(select_batch)
+avg_hs = hs[2]
 # If time task, use average
-avg_hs = hs[0]
+# -----------------------------
+# avg_hs = np.mean(hs, axis=0)
 print(avg_hs.shape)
 
 warmup, end = 10, avg_hs.shape[0]

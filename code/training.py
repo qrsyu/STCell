@@ -25,13 +25,13 @@ data = np.load(f'{load_dir}/{args.load_data_type}.npy', allow_pickle=True).item(
 train_inputs = torch.tensor(data['train_inputs'], dtype=torch.float32).to(device)
 train_labels = torch.tensor(data['train_labels'], dtype=torch.float32).to(device)
 
-# Only use a subset of the data for training
-train_inputs = train_inputs[:64]
-train_labels = train_labels[:64]
+# # Only use a subset of the data for training
+# train_inputs = train_inputs[:64]
+# train_labels = train_labels[:64]
 
 # Create DataLoader for training and testing
 train_dataset = TensorDataset(train_inputs, train_labels)
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 # ===========================================================================================
 # Initialise the RNN
@@ -117,13 +117,6 @@ optimizer = torch.optim.Adam(rnn.parameters(), lr=0.0005)
 rnn.train()
 
 losses = []
-
-# ---------------------------------- #
-# 2WSMS: 0.99995, 0.00005            #
-# 2WSMS_mask: 0.99999, 0.00001       #
-# 2TS:             1, 0.0001         #
-# 2WSMS_mask_vary: 1, 0.0001         #
-# ---------------------------------- #
 
 for epoch in tqdm(range(10000)):
 
