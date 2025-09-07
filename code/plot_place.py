@@ -79,13 +79,13 @@ os.makedirs(save_dir, exist_ok=True)
 # # select_indices = [i for i in range(ratemap.shape[0]) if decisions[i]]
 select_indices = range(args.num_neuron)
 # # Plot the ratemap
-for imap in tqdm(select_indices):
-    fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
-    ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
-    ax.axis('off')
-    plt.tight_layout()
-    plt.savefig(f'{save_dir}/ratemap_neuron_{imap}', transparent=True)
-    plt.close(fig)
+# for imap in tqdm(select_indices):
+#     fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
+#     ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
+#     ax.axis('off')
+#     plt.tight_layout()
+#     plt.savefig(f'{save_dir}/ratemap_neuron_{imap}', transparent=True)
+#     plt.close(fig)
 
 # ===========================================================================================
 # Plot a summation of place cells angular contributions

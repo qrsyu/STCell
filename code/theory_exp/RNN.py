@@ -122,9 +122,9 @@ def gaussian_kernel_from_coords(neuron_coords, src_coords, sigma, amp=1.0, norm=
 class ExperienceCANN:
     neuron_coords: np.ndarray
     channel_coords: np.ndarray
-    alpha: float = 0.03
-    sigma_rec: float = 0.3
-    sigma_in: float = 0.3
+    alpha: float = 0.3
+    sigma_rec: float = 0.1
+    sigma_in: float = 0.1
     W0_rc: float = 1.0
     W0_in: float = 1.0
     bias: np.ndarray = None
