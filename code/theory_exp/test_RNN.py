@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 
 ### Load the experimental data ###
-load_data_type = '2WSMS'
+load_data_type = '2TS_trial'
 num_neuron = 512
 data = np.load(f'data/{load_data_type}.npy', allow_pickle=True).item()
 print(data.keys())
@@ -18,8 +18,12 @@ print(exp_vectors.shape)
 
 
 ### The coordinates of neurons and input channels in abstract 2D space
-# ---- neurons: 512 = 8 x 8 x 8 ----
-Ny, Nx, Nt = 8, 8, 8               
+# ---- neurons: 512 = 32 x 16 ----
+# # One dim ver
+# Nt = 512
+# neuron_coords = np.linspace(0, 1.0, Nt, endpoint=False).reshape(-1,1)   # (512, 1)
+# Three dims ver
+Nx, Ny, Nt = 8, 8, 8              
 y = np.linspace(0, 1.0, Ny, endpoint=False)
 x = np.linspace(0, 1.0, Nx, endpoint=False)
 t = np.linspace(0, 1.0, Nt, endpoint=False)
@@ -27,27 +31,51 @@ Y, X, T = np.meshgrid(y, x, t, indexing='ij')
 neuron_coords = np.stack([X.ravel(), Y.ravel(), T.ravel()], axis=-1)   # (512, 3)
 
 # ---- channels: 100 = 5 x 5 x 4 ----
-Cy, Cx, Ct = 5, 5, 4
-yc = np.linspace(0, 1.0, Cy, endpoint=False)
+# # One dim ver
+# Ct = 100
+# channel_coords = np.linspace(0, 1.0, Ct, endpoint=False).reshape(-1,1)  # (100, 1)
+# Three dims ver
+Cx, Cy, Ct = 5, 5, 4
 xc = np.linspace(0, 1.0, Cx, endpoint=False)
+yc = np.linspace(0, 1.0, Cy, endpoint=False)
 tc = np.linspace(0, 1.0, Ct, endpoint=False)
 Yc, Xc, Tc = np.meshgrid(yc, xc, tc, indexing='ij')
 channel_coords = np.stack([Xc.ravel(), Yc.ravel(), Tc.ravel()], axis=-1)  # (100, 3)
 
-
+# ---- Parameters of the RNN ----
+# One dim ver
+# params_dict = {
+#     'alpha': 0.1,
+#     'sigma_rec': 0.1,
+#     'sigma_in': 0.01, 
+#     'periodic': False, 
+#     'box_size': 1.0,   
+# }
+# Three dims ver
+params_dict = {
+    'alpha': 0.05,
+    # Wrc
+    'W_rc_type': 'SpaceGaussian',
+    'sigma_rc': 0.02, 
+    'W0_rc': 1.0,
+    'lambda_rc': 0.2, 
+    # Win
+    'W_in_type': 'SpaceGaussian',
+    'sigma_in': 0.05, 
+    'W0_in': 1.0,
+    'lambda_in': 1.5,
+    
+    'periodic': (False, False, False), 
+    'box_size': (1.0, 1.0, 1.0),       
+}
 
 # 2) 建网（不训练，权重由高斯核直接给出）
 RNNnet = ExperienceCANN(
+    **params_dict,
     neuron_coords=neuron_coords,
     channel_coords=channel_coords,
-    alpha=0.3,
-    sigma_rec=0.02, #sigma_rec,
-    sigma_in=0.1, #sigma_in,
-    W0_rc=1, W0_in=1,  # Amplitude
     gain=1,  nonlinearity="relu",
-    periodic=(True, True, False), 
-    box_size=(1.0,1.0,1.0),   # 打开环面距离（可关）
-    divisive_norm=True        # 分式归一化确保 bump 稳定
+    divisive_norm=True 
 )
 
 
@@ -55,7 +83,6 @@ RNNnet = ExperienceCANN(
 # 3) 前向积分（无训练）
 fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
 avg_fr = np.mean(fr, axis=0)   # (T,N)
-print(fr.shape, avg_fr.shape)
 # print(avg_fr)
 # Plot the hidden states
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -64,8 +91,8 @@ norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.0,
                           )
 plt.savefig(f'output/theory_rnn_{load_data_type}_{num_neuron}_hs.png')
 
-# Save the data
-data[f'theory_hidden_states_{num_neuron}'] = fr
+# # Save the data
+# data[f'theory_hidden_states_{num_neuron}'] = fr
 
 
 
@@ -94,12 +121,12 @@ data[f'theory_hidden_states_{num_neuron}'] = fr
 
 
 
-### Lyapunov exponent estimation ###
-avg_lpn, lpn = max_lyapunov_exponent(RNNnet, exp_vectors[0], return_logs=True)
-print(avg_lpn)
-plt.figure(); plt.plot(lpn[0]); 
-plt.axhline(avg_lpn, ls='--', lw=1, label='average'); plt.legend(loc='best'); plt.title("Max Lyapunov exponent")
-plt.savefig(f'output/theory_rnn_{load_data_type}_{num_neuron}_lyapunov.png')
+# ### Lyapunov exponent estimation ###
+# avg_lpn, lpn = max_lyapunov_exponent(RNNnet, exp_vectors[0], return_logs=True)
+# print(avg_lpn)
+# plt.figure(); plt.plot(lpn[0]); 
+# plt.axhline(avg_lpn, ls='--', lw=1, label='average'); plt.legend(loc='best'); plt.title("Max Lyapunov exponent")
+# plt.savefig(f'output/theory_rnn_{load_data_type}_{num_neuron}_lyapunov.png')
 
-data['lyapunov'] = lpn
-np.save(f'data/{load_data_type}.npy', data, allow_pickle=True)
+# data['lyapunov'] = lpn
+# np.save(f'data/{load_data_type}.npy', data, allow_pickle=True)
