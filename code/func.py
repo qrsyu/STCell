@@ -36,6 +36,9 @@ def plt_hs(hs, min_fr=0.1, fig=None, ax=None):
     ax.set_ylabel('Neurons')
     ax.set_xticks(np.linspace(0, norm_hs.shape[0]/10, 6))
     
+    # Plot the colorbar
+    cbar = fig.colorbar(ax.images[0], ax=ax)
+    cbar.set_label('Normalized firing rate')
     return norm_hs, fig, ax
 
 def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'salmon']):

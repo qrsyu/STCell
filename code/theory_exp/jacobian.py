@@ -88,6 +88,50 @@ def compute_jacobian_over_time(net, E, return_full_spectrum=False):
     else:
         return max_real_cont, spectral_radius_disc
     
+def compute_jacobian_over_time2(net, E, return_full_spectrum=False):
+
+    # 统一成 (1,T,C)
+    if E.ndim == 2:     # (T,C)
+        E = E[None, :, :]
+
+    B, T, C = E.shape
+    N = 512
+
+    # 先正向一次，收集每步的 V_t
+    V = np.zeros((B, N), dtype=float)
+    Vs = np.empty((B, T, N), dtype=float)
+    _, fr = net(E)
+    
+    # 逐时刻计算 Jacobian 与稳定性指标
+    max_real_cont      = np.empty((B, T), dtype=float)
+    spectral_radius_disc = np.empty((B, T), dtype=float)
+
+    eigs_c_list = np.empty((B, T, N), dtype=complex) if return_full_spectrum else None
+    eigs_d_list = np.empty((B, T, N), dtype=complex) if return_full_spectrum else None
+
+    for b in tqdm(range(B)):
+        for t in range(T):
+            Jc, Jd = _jacobian_mats(
+                Wrc=net.recurrent_layers[0].leaky_layer.linear_layer.weight.cpu().detach().numpy(),
+                Vt=Vs[b, t, :],
+                gain=1,
+                nonlin='relu',
+                divisive_norm=True,
+                alpha=0.03,   # dt/tau
+            )
+            eig_c = np.linalg.eigvals(Jc)
+            eig_d = np.linalg.eigvals(Jd)
+            max_real_cont[b, t]        = np.max(np.real(eig_c))
+            spectral_radius_disc[b, t] = np.max(np.abs(eig_d))
+
+            if return_full_spectrum:
+                eigs_c_list[b, t, :] = eig_c
+                eigs_d_list[b, t, :] = eig_d
+
+    if return_full_spectrum:
+        return max_real_cont, spectral_radius_disc, eigs_c_list, eigs_d_list
+    else:
+        return max_real_cont, spectral_radius_disc
     
 def plot_realpart_heatmap(eigs, bins=120, rmin=None, rmax=None, title=None):
     """

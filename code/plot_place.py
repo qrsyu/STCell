@@ -16,16 +16,23 @@ args = parser.parse_args()
     
 data = np.load(f'data/{args.load_data_type}.npy', allow_pickle=True).item()
 hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
-print(hidden_states.shape)
 
-# ===========================================================================================
-# Calculate the occupancy map
-# ===========================================================================================
 
-occupancy = compute_coarse_occupancy(data['test_traj']['coords'], 
-                                     old_bins=data['arena_map'].shape,
-                                     new_bins=(36, 36))
-print('Occupancy has the shape of the arena: ', occupancy.shape)
+# Optional: select half of the time points
+time_start, time_end = 50, 100
+select_hs = hidden_states[:, time_start:time_end, :]
+select_coords = data['test_traj']['coords'][:, time_start:time_end, :]
+print(select_hs.shape, select_coords.shape)
+
+# # ===========================================================================================
+# # Calculate the occupancy map
+# # ===========================================================================================
+
+
+# occupancy = compute_coarse_occupancy(select_coords, 
+#                                      old_bins=data['arena_map'].shape,
+#                                      new_bins=(36, 36))
+# print('Occupancy has the shape of the arena: ', occupancy.shape)
 
 # # Plot the occupancy (有用)
 # --------------------------------------------------------------------------------------------
@@ -49,43 +56,42 @@ print('Occupancy has the shape of the arena: ', occupancy.shape)
 
 aggregator = RatemapAggregator(data['arena_map'], device='cuda')
 
-aggregator.update(hidden_states, data['test_traj']['coords'])
+aggregator.update(select_hs, select_coords)
 ratemap = aggregator.get_ratemap().cpu().numpy()
 print(ratemap.shape)
 
-# Resize ratemap
-coa_ratemap = coarse_ratemap(ratemap, new_bins=(36, 36))
-print(coa_ratemap.shape)
+# # Resize ratemap
+# coa_ratemap = coarse_ratemap(ratemap, new_bins=(36, 36))
+# print(coa_ratemap.shape)
 
-# ===========================================================================================
-# Calculate the SIC
-# ===========================================================================================
+# # ===========================================================================================
+# # Calculate the SIC
+# # ===========================================================================================
 
-spatial_infos, decisions = SIC_analysis(coa_ratemap, occupancy)
-print('The ratio of place cells is: ', np.sum(decisions) / len(decisions))
-print('The number of place cells is: ', np.sum(decisions))
+# spatial_infos, decisions = SIC_analysis(coa_ratemap, occupancy)
+# print('The ratio of place cells is: ', np.sum(decisions) / len(decisions))
+# print('The number of place cells is: ', np.sum(decisions))
 
 # ===========================================================================================
 # Plot the ratemap
 # ===========================================================================================
 
-save_dir = f'result/{args.load_data_type}_{args.num_neuron}_{args.theory}ratemap/'
+save_dir = f'result/{args.load_data_type}_{args.num_neuron}_{args.theory}ratemap_time{time_start}-{time_end}/'
 os.makedirs(save_dir, exist_ok=True)
 
-# # Convert all zero to nan
-# ratemap[ratemap == 0] = np.nan
+# Convert all zero to nan
+ratemap[ratemap == 0] = np.nan
 
-# # Only plot those with decisions = True
 # # select_indices = [i for i in range(ratemap.shape[0]) if decisions[i]]
 select_indices = range(args.num_neuron)
-# # Plot the ratemap
-# for imap in tqdm(select_indices):
-#     fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
-#     ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
-#     ax.axis('off')
-#     plt.tight_layout()
-#     plt.savefig(f'{save_dir}/ratemap_neuron_{imap}', transparent=True)
-#     plt.close(fig)
+# Plot the ratemap
+for imap in tqdm(select_indices):
+    fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
+    ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
+    ax.axis('off')
+    plt.tight_layout()
+    plt.savefig(f'{save_dir}/ratemap_neuron_{imap}', transparent=True)
+    plt.close(fig)
 
 # ===========================================================================================
 # Plot a summation of place cells angular contributions
@@ -108,16 +114,16 @@ plt.tight_layout()
 plt.savefig(f'{save_dir}/ratemap_sum', transparent=True)
 plt.close(fig)
 
-# ===========================================================================================
-# Plot temporal firing rates
-# ===========================================================================================
+# # ===========================================================================================
+# # Plot temporal firing rates
+# # ===========================================================================================
 
-# Average across the batch
+# # Average across the batch
 
-avg_hs = np.mean(hidden_states, axis=0)
-print(avg_hs.shape)
+# avg_hs = np.mean(hidden_states, axis=0)
+# print(avg_hs.shape)
 
-fig, ax = plt.subplots(figsize=(10, 6))
-norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.0, fig=fig, ax=ax)
-plt.savefig(f'{save_dir}/temporal_batch_avg.png', transparent=True)
-plt.close(fig),
+# fig, ax = plt.subplots(figsize=(10, 6))
+# norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.0, fig=fig, ax=ax)
+# plt.savefig(f'{save_dir}/temporal_batch_avg.png', transparent=True)
+# plt.close(fig),

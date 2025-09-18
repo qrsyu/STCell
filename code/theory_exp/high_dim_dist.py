@@ -3,11 +3,11 @@ from .RNN import ExperienceCANN
 from .jacobian import *
 from ..func import plt_hs
 from matplotlib import pyplot as plt
-
+import torch
 
 
 ### Load the experimental data ###
-load_data_type = '2WSMS'
+load_data_type = '2TS_trial'
 num_neuron = 512
 data = np.load(f'data/{load_data_type}.npy', allow_pickle=True).item()
 exp_vectors = data['test_labels']
@@ -46,14 +46,12 @@ RNNnet = ExperienceCANN(
     divisive_norm=True        # 分式归一化确保 bump 稳定
 )
 
-
-
 ref_fr = RNNnet.run(exp_vectors)
 print(ref_fr.shape)
 
 
 
-# Patially mask the input 
+# Partially mask the input
 mask_indices = [30, 40, 50, 60, 70, 80, 90, 100]
 
 # Set up the figure
@@ -61,8 +59,9 @@ fig, ax = plt.subplots(len(mask_indices), 1, figsize=(6, len(mask_indices)), sha
 for idx, mask_idx in enumerate(mask_indices):
     
     exp_vectors[:, 20:mask_idx, :] = 0
-
-    fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
+    
+    # fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
+    fr = rnn(exp_vectors)[1].cpu().numpy()
     
     # Compute the higher dimensional distance
     dist = np.linalg.norm(fr - ref_fr, axis=-1)  # (B,T)

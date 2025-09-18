@@ -85,11 +85,13 @@ fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
 avg_fr = np.mean(fr, axis=0)   # (T,N)
 # print(avg_fr)
 # Plot the hidden states
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(5, 3))
 norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.0, 
                         #   mask_start=20, mask_end=150
                           )
-plt.savefig(f'output/theory_rnn_{load_data_type}_{num_neuron}_hs.png')
+ax.set_xlabel('Time (s)')
+plt.tight_layout()
+plt.savefig(f'output/theory_rnn_{load_data_type}_{num_neuron}_hs.png', transparent=True)
 
 # # Save the data
 # data[f'theory_hidden_states_{num_neuron}'] = fr
