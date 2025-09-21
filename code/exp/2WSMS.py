@@ -47,6 +47,8 @@ sensory_profile = {
 gym.set_sensory_from_profile(sensory_profile)
 gym.set_behavior_from_profile(behavior_profile)
 
+gym.trial.vis_sensory()
+
 arena_map = gym.arena_map
 
 time_pts = 100
@@ -55,6 +57,8 @@ traj = generate_circular_trajectories(arena_map, R_out, R_in, vel_mean, vel_std,
 
 # Generate (Batch size) trial
 gym.trial.new_trial(duration=0, external_traj=traj)
+
+# gym.trial.vis_sensory()
 
 # Get some specific responses within a time range, the key should be the same as the sensory profile
 space_res = gym.trial.get_responses(keys='wsm')

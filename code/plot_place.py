@@ -19,20 +19,16 @@ hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
 
 
 # Optional: select half of the time points
-time_start, time_end = 50, 100
+time_start, time_end = 0, -1
 select_hs = hidden_states[:, time_start:time_end, :]
 select_coords = data['test_traj']['coords'][:, time_start:time_end, :]
-print(select_hs.shape, select_coords.shape)
 
-# # ===========================================================================================
-# # Calculate the occupancy map
-# # ===========================================================================================
+# ===========================================================================================
+# Calculate the occupancy map
+# ===========================================================================================
 
-
-# occupancy = compute_coarse_occupancy(select_coords, 
-#                                      old_bins=data['arena_map'].shape,
-#                                      new_bins=(36, 36))
-# print('Occupancy has the shape of the arena: ', occupancy.shape)
+occupancy = compute_occupancy(select_coords, bins=data['arena_map'].shape)
+print('Occupancy has the shape of the arena: ', occupancy.shape)
 
 # # Plot the occupancy (有用)
 # --------------------------------------------------------------------------------------------
@@ -60,59 +56,56 @@ aggregator.update(select_hs, select_coords)
 ratemap = aggregator.get_ratemap().cpu().numpy()
 print(ratemap.shape)
 
-# # Resize ratemap
-# coa_ratemap = coarse_ratemap(ratemap, new_bins=(36, 36))
-# print(coa_ratemap.shape)
+# ===========================================================================================
+# Calculate the SIC
+# ===========================================================================================
+
+ratemap_angles, angles, radius = ratemap_to_angle_profile(ratemap)
+occupancy_angles, _, _ = ratemap_to_angle_profile(occupancy[None, :, :])
+SIC, place_cells = SIC_analysis(ratemap_angles, occupancy_angles, threshold=8)
+print(f'Number of place cells: {np.sum(place_cells)} / {args.num_neuron}')
+select_indices = np.where(place_cells)[0]
 
 # # ===========================================================================================
-# # Calculate the SIC
+# # Plot the ratemap
 # # ===========================================================================================
 
-# spatial_infos, decisions = SIC_analysis(coa_ratemap, occupancy)
-# print('The ratio of place cells is: ', np.sum(decisions) / len(decisions))
-# print('The number of place cells is: ', np.sum(decisions))
+# save_dir = f'result/{args.load_data_type}_{args.num_neuron}_{args.theory}ratemap_time{time_start}-{time_end}/'
+# os.makedirs(save_dir, exist_ok=True)
 
-# ===========================================================================================
-# Plot the ratemap
-# ===========================================================================================
+# # Convert all zero to nan
+# ratemap[ratemap == 0] = np.nan
 
-save_dir = f'result/{args.load_data_type}_{args.num_neuron}_{args.theory}ratemap_time{time_start}-{time_end}/'
-os.makedirs(save_dir, exist_ok=True)
+# # Plot the ratemap
+# # select_indices = range(args.num_neuron)
+# for imap in tqdm(select_indices):
+#     fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
+#     ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
+#     ax.axis('off')
+#     plt.tight_layout()
+#     plt.savefig(f'{save_dir}/ratemap_neuron_{imap}', transparent=True)
+#     plt.close(fig)
 
-# Convert all zero to nan
-ratemap[ratemap == 0] = np.nan
+# # ===========================================================================================
+# # Plot a summation of place cells angular contributions
+# # ===========================================================================================
 
-# # select_indices = [i for i in range(ratemap.shape[0]) if decisions[i]]
-select_indices = range(args.num_neuron)
-# Plot the ratemap
-for imap in tqdm(select_indices):
-    fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
-    ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
-    ax.axis('off')
-    plt.tight_layout()
-    plt.savefig(f'{save_dir}/ratemap_neuron_{imap}', transparent=True)
-    plt.close(fig)
+# ratemap_sum = np.nansum(ratemap[select_indices], axis=0)
+# ratemap_sum[ratemap_sum == 0] = np.nan
 
-# ===========================================================================================
-# Plot a summation of place cells angular contributions
-# ===========================================================================================
-
-ratemap_sum = np.nansum(ratemap[select_indices], axis=0)
-ratemap_sum[ratemap_sum == 0] = np.nan
-
-fig, ax = plt.subplots(1, 1, figsize=(4.9, 4))  
-cbar = plt.colorbar(ax.imshow(ratemap_sum, cmap='jet', aspect='auto'), 
-                    ax=ax, fraction=0.046, pad=0.04, orientation='vertical', location='left')
-cbar.set_label('Firing Rate (Hz)', rotation=270, labelpad=20)
-cbar.ax.tick_params(labelsize=12)  # Set colorbar tick label size
-# Move colorbar ticks to the left
-cbar.ax.yaxis.set_ticks_position('left')
-cbar.ax.yaxis.set_label_position('left')
-ax.imshow(ratemap_sum, cmap='jet', aspect='auto')
-ax.axis('off')
-plt.tight_layout()
-plt.savefig(f'{save_dir}/ratemap_sum', transparent=True)
-plt.close(fig)
+# fig, ax = plt.subplots(1, 1, figsize=(4.9, 4))  
+# cbar = plt.colorbar(ax.imshow(ratemap_sum, cmap='jet', aspect='auto'), 
+#                     ax=ax, fraction=0.046, pad=0.04, orientation='vertical', location='left')
+# cbar.set_label('Firing Rate (Hz)', rotation=270, labelpad=20)
+# cbar.ax.tick_params(labelsize=12)  # Set colorbar tick label size
+# # Move colorbar ticks to the left
+# cbar.ax.yaxis.set_ticks_position('left')
+# cbar.ax.yaxis.set_label_position('left')
+# ax.imshow(ratemap_sum, cmap='jet', aspect='auto')
+# ax.axis('off')
+# plt.tight_layout()
+# plt.savefig(f'{save_dir}/ratemap_sum', transparent=True)
+# plt.close(fig)
 
 # # ===========================================================================================
 # # Plot temporal firing rates

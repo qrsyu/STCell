@@ -82,55 +82,30 @@ def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'sa
      
     return fig, ax
 
-# def compute_occupancy_map(positions, arena_shape, smoothing_sigma=1.0):
-#     """
-#     positions: (batch_size, time, 2), 每个时间点的位置 (x, y)
-#     arena_shape: (H, W), 你的 ratemap 的空间分辨率
-#     """
-#     H, W = arena_shape
-#     occupancy = np.zeros((H, W))
 
-#     # 合并 batch
-#     all_positions = positions.reshape(-1, 2)
-
-#     # 把位置坐标离散化到 0~H-1, 0~W-1 网格上
-#     x = np.clip(all_positions[:, 0].astype(int), 0, W - 1)
-#     y = np.clip(all_positions[:, 1].astype(int), 0, H - 1)
-
-#     # 计数
-#     for i in range(len(x)):
-#         occupancy[y[i], x[i]] += 1
-
-#     # 可选平滑
-#     from scipy.ndimage import gaussian_filter
-#     occupancy = gaussian_filter(occupancy, sigma=smoothing_sigma)
-
-#     # 归一化
-#     occupancy = occupancy / np.sum(occupancy)
-
-#     return occupancy
-
-
-def compute_coarse_occupancy(pos, old_bins, new_bins=(10, 10), sigma=1):
-    coarse_pos = coarse_grain_positions(pos, old_bins, new_bins)
-    H, W = new_bins
+def compute_occupancy(pos, bins):
+    H, W = bins
     occ_map = np.zeros((H, W))
 
-    all_pos = coarse_pos.reshape(-1, 2)
-    for p in all_pos:
-        y, x = p[1], p[0]
-        occ_map[y, x] += 1
+    all_pos = pos.reshape(-1, 2)
 
-    # smoothing
-    from scipy.ndimage import gaussian_filter
-    occ_map = gaussian_filter(occ_map, sigma=sigma)
+    for p in all_pos:
+        x, y = p[0], p[1]
+        # Find the nearest integer grid point
+        x = int(np.clip(np.round(x), 0, W-1))
+        y = int(np.clip(np.round(y), 0, H-1))
+        occ_map[x, y] += 1
+
+    # # smoothing
+    # from scipy.ndimage import gaussian_filter
+    # occ_map = gaussian_filter(occ_map, sigma=sigma)
 
     # normalize
     occ_map /= np.sum(occ_map)
     return occ_map
 
 
-def compute_SIC(rate_map, occupancy_map, eps=1e-12):
+def _compute_SIC(rate_map, occupancy_map, eps=1e-12):
     """
     rate_map: (H, W)
     occupancy_map: (H, W), must sum to 1
@@ -144,7 +119,7 @@ def compute_SIC(rate_map, occupancy_map, eps=1e-12):
     with np.errstate(divide='ignore', invalid='ignore'):
         ratio = rate_map / mean_rate
         log_term = np.log2(ratio + eps)
-        info = np.nansum(occupancy_map * rate_map / mean_rate * log_term)
+        info = np.nansum(occupancy_map * (rate_map / mean_rate) * log_term)
         return info
     
     
@@ -153,69 +128,59 @@ def SIC_analysis(ratemaps, occupancy_map, threshold=3):
     ratemaps: (N, H, W)
     occupancy_map: (H, W), should sum to 1
     """
-    
-    N, H, W = ratemaps.shape
+
+    N = ratemaps.shape[0]
     spatial_infos = np.zeros(N)
-    p_values = np.zeros(N)
     is_place_cell = np.zeros(N, dtype=bool)
 
     # Compute real spatial info
     for i in tqdm(range(N), desc='Computing SIC for neurons'):
-        spatial_infos[i] = compute_SIC(ratemaps[i], occupancy_map)
+        spatial_infos[i] = _compute_SIC(ratemaps[i], occupancy_map)
     
     is_place_cell = spatial_infos > threshold
 
     return spatial_infos, is_place_cell
 
 
-def coarse_grain_positions(positions, old_bins = (54, 54), new_bins=(10, 10)):
-    """
-    positions: (B, T, 2), 每个点是 (x, y)
-    返回 coarse 之后的整数 index 格子位置
-    """
+def ratemap_to_angle_profile(ratemaps, nbins=18, radius=None):
+
+    N, X, _ = ratemaps.shape
+
+    yy, xx = np.mgrid[0:X, 0:X]
+
+    cy = X / 2.0
+    cx = X / 2.0
+
+    dy = yy - cy
+    dx = xx - cx
+    angles = np.arctan2(dy, dx)  # [-pi, pi)
+    dists  = np.hypot(dy, dx)
+
+    if radius is None:
+        radius = np.min([cx, cy, X-1-cx, X-1-cy])
+    print(radius)
     
-    scale_x = new_bins[1] / old_bins[1]
-    scale_y = new_bins[0] / old_bins[0]
+    circle_mask = dists <= radius
+    
+    edges = np.linspace(-np.pi, np.pi, nbins + 1, endpoint=True)
+    bin_centers = 0.5 * (edges[:-1] + edges[1:])
 
-    scaled = positions.copy()
-    scaled[..., 0] = positions[..., 0] * scale_x  # x
-    scaled[..., 1] = positions[..., 1] * scale_y  # y
+    ang_flat = angles[circle_mask].ravel()
+    R_flat = ratemaps[:, circle_mask] 
 
-    # 转成整数 index
-    scaled = np.floor(scaled).astype(int)
-    scaled[..., 0] = np.clip(scaled[..., 0], 0, new_bins[1] - 1)
-    scaled[..., 1] = np.clip(scaled[..., 1], 0, new_bins[0] - 1)
-    return scaled
-
-
-def coarse_ratemap(ratemaps, new_bins=(20, 20)):
-    """
-    ratemaps: shape (N, H, W)
-    target_shape: new shape (h, w), coarse bins
-    Returns: shape (N, h, w)
-    """
-    N, H, W = ratemaps.shape
-    h, w = new_bins
-
-    # 计算 coarse bin 的真实大小（可能是浮点）
-    bin_height = H / h
-    bin_width = W / w
-
-    coarse_maps = np.zeros((N, h, w))
-
-    for i in range(h):
-        for j in range(w):
-            # 对应原图的范围：从什么到什么
-            y_start = int(np.floor(i * bin_height))
-            y_end   = min(int(np.floor((i + 1) * bin_height)), H)
-            x_start = int(np.floor(j * bin_width))
-            x_end   = min(int(np.floor((j + 1) * bin_width)), W)
-
-            # 平均这个块内的值
-            if (y_end > y_start) and (x_end > x_start):
-                block = ratemaps[:, y_start:y_end, x_start:x_end]
-                # Should take care of nan
-                block = np.where(np.isnan(block), 0, block)
-                coarse_maps[:, i, j] = block.mean(axis=(1, 2))
-
-    return coarse_maps
+    ratemap_angle = np.zeros((N, nbins), dtype=float)
+    counts = np.histogram(ang_flat, bins=edges)[0]
+    for i in range(N):
+        
+        Ri = R_flat[i]                  
+        valid = np.isfinite(Ri)             
+        ang_i  = ang_flat[valid]
+        R_i    = Ri[valid]
+        
+        sums = np.histogram(ang_i, bins=edges, weights=R_i)[0]
+        ratemap_angle[i] = np.divide(
+            sums, counts,
+            out=np.zeros_like(sums, dtype=float),
+            where=(counts > 0)
+        )
+    return ratemap_angle, bin_centers, radius

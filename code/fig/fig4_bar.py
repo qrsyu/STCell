@@ -37,8 +37,8 @@ ax.set_yticklabels(yticklabels)
 
 ax.set_xlim(0, 100)
 
-plt.xlabel('Time (s)')
+plt.xlabel('Temporal channels')
 
 
 plt.tight_layout()
-plt.savefig('output/fig4_b.png')
+plt.savefig('output/fig4_b.png', transparent=True)
