@@ -3,9 +3,9 @@ import numpy as np
 from tqdm import tqdm
 
 
-def plt_hs(hs, min_fr=0.1, fig=None, ax=None):
+def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
 
-    time_points, num_neurons = hs.shape[0], hs.shape[1]
+    time_points = hs.shape[0]
 
     # Select neurons with mean firing rate > 0.1
     mean_fr = hs.mean(axis=0)
@@ -27,6 +27,7 @@ def plt_hs(hs, min_fr=0.1, fig=None, ax=None):
     max_time = np.argmax(norm_hs, axis=0)
     sorted_neuron_indices = np.argsort(max_time)
     norm_hs = norm_hs[:, sorted_neuron_indices]
+    num_neurons = norm_hs.shape[1]
     
     # Plot the normalized hs
     ax.imshow(norm_hs.T, aspect='auto', cmap='jet',  
@@ -35,10 +36,18 @@ def plt_hs(hs, min_fr=0.1, fig=None, ax=None):
     # ax.set_xlabel('Time (s)')
     ax.set_ylabel('Neurons')
     ax.set_xticks(np.linspace(0, norm_hs.shape[0]/10, 6))
+
+    if masks is not None:
+        for m in masks:
+            ax.axvline(x=m[0], color='white', linestyle='--', linewidth=1)
+            ax.axvline(x=m[1], color='white', linestyle='-', linewidth=1)
+            # Plot a semi-transparent rectangle to cover the masked region
+            ax.add_patch(plt.Rectangle((m[0], 0), m[1]-m[0], norm_hs.shape[1], 
+                                       color='white', alpha=0.3))
     
-    # Plot the colorbar
-    cbar = fig.colorbar(ax.images[0], ax=ax)
-    cbar.set_label('Normalized firing rate')
+    # # Plot the colorbar
+    # cbar = fig.colorbar(ax.images[0], ax=ax)
+    # cbar.set_label('Normalized firing rate')
     return norm_hs, fig, ax
 
 def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'salmon']):

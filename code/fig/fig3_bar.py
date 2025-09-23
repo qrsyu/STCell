@@ -57,4 +57,4 @@ plt.xlabel('Time (s)')
 
 
 plt.tight_layout()
-plt.savefig('output/fig3_b.png')
+plt.savefig('output/fig3_b.png', transparent=True)
