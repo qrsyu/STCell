@@ -1,18 +1,17 @@
 import numpy as np
-from .RNN import ExperienceCANN
+from .RNN2 import ExperienceCANN
 from .jacobian import *
 from ..func import plt_hs
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 
 
 
 ### Load the experimental data ###
-load_data_type = '2TS_trial'
+load_data_type = '2TS_1_data'
 num_neuron = 512
-data = np.load(f'data/{load_data_type}.npy', allow_pickle=True).item()
+data = np.load(f'code/time_exp/{load_data_type}.npy', allow_pickle=True).item()
 print(data.keys())
-exp_vectors = data['test_labels']
+exp_vectors = data['test_labels'].cpu().numpy()  
 print(exp_vectors.shape)
 
 
@@ -43,30 +42,16 @@ Yc, Xc, Tc = np.meshgrid(yc, xc, tc, indexing='ij')
 channel_coords = np.stack([Xc.ravel(), Yc.ravel(), Tc.ravel()], axis=-1)  # (100, 3)
 
 # ---- Parameters of the RNN ----
-# One dim ver
-# params_dict = {
-#     'alpha': 0.1,
-#     'sigma_rec': 0.1,
-#     'sigma_in': 0.01, 
-#     'periodic': False, 
-#     'box_size': 1.0,   
-# }
-# Three dims ver
-params_dict = {
-    'alpha': 0.05,
+params_dict = {'alpha': 0.01,
     # Wrc
-    'W_rc_type': 'SpaceGaussian',
-    'sigma_rc': 0.02, 
-    'W0_rc': 1.0,
-    'lambda_rc': 0.2, 
-    # Win
-    'W_in_type': 'SpaceGaussian',
-    'sigma_in': 0.05, 
-    'W0_in': 1.0,
-    'lambda_in': 1.5,
-    
-    'periodic': (False, False, False), 
-    'box_size': (1.0, 1.0, 1.0),       
+    'W_rc_type': 'MexicanHat',
+    'sigmaE_rc': 0.57, 
+    'sigmaI_rc': 0.63,
+    'W0E_rc': 3.45,
+    'W0I_rc': 5.35,
+
+    'periodic': (True, True, False), 
+    'box_size': (1.0, 1.0, None),   
 }
 
 # 2) 建网（不训练，权重由高斯核直接给出）
@@ -74,8 +59,7 @@ RNNnet = ExperienceCANN(
     **params_dict,
     neuron_coords=neuron_coords,
     channel_coords=channel_coords,
-    gain=1,  nonlinearity="relu",
-    divisive_norm=True 
+    divisive_norm=True
 )
 
 
@@ -83,15 +67,29 @@ RNNnet = ExperienceCANN(
 # 3) 前向积分（无训练）
 fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
 avg_fr = np.mean(fr, axis=0)   # (T,N)
-# print(avg_fr)
+
 # Plot the hidden states
 fig, ax = plt.subplots(figsize=(5, 3))
-norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.0, 
+norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.001, 
                         #   mask_start=20, mask_end=150
                           )
 ax.set_xlabel('Time (s)')
 plt.tight_layout()
-plt.savefig(f'output/theory_rnn_{load_data_type}_{num_neuron}_hs.png', transparent=True)
+plt.savefig(f'code/theory_exp/theory_rnn_{load_data_type}_{num_neuron}_hs.png', # transparent=True
+            )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # # Save the data
 # data[f'theory_hidden_states_{num_neuron}'] = fr

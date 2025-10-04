@@ -45,9 +45,9 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
             ax.add_patch(plt.Rectangle((m[0], 0), m[1]-m[0], norm_hs.shape[1], 
                                        color='white', alpha=0.3))
     
-    # # Plot the colorbar
-    # cbar = fig.colorbar(ax.images[0], ax=ax)
-    # cbar.set_label('Normalized firing rate')
+    # Plot the colorbar
+    cbar = fig.colorbar(ax.images[0], ax=ax)
+    cbar.set_label('Normalized firing rate')
     return norm_hs, fig, ax
 
 def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'salmon']):

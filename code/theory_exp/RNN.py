@@ -30,6 +30,7 @@ def pairwise_sqdist(A, B, periodic=None, box_size=None):
         A 与 B 的**两两距离平方矩阵**。d2[i, j] = ||A[i] - B[j]||^2
         （若 periodic=True，则差值先按 box_size 做周期 wrap）。
     """
+    
     Aexp = A[:, None, :]; Bexp = B[None, :, :]
     diff = Aexp - Bexp
     print('diff:', diff.shape)
@@ -72,51 +73,10 @@ def pairwise_dist(A, B):
     print('diff time dim:', diff.shape)
     return diff
 
-def gaussian_kernel_from_coords(neuron_coords, src_coords, Wtype, sigma, Lambda=None, amp=1.0, periodic=None, box_size=None):
-    """
-    根据坐标生成高斯核权重矩阵 W(x - y)。
+def gaussian_kernel_from_coords(neuron_coords, src_coords, Wtype, sigma, 
+                                Lambda=None, amp=1.0, gamma=0.0, 
+                                periodic=None, box_size=None):
 
-    参数
-    ----
-    neuron_coords : array_like, shape = (N, D)
-        N 个神经元在 D 维空间中的坐标（如 1D 环、2D 平面、3D 等）。
-        单位/量纲需与 src_coords、sigma、box_size 一致。
-
-    src_coords : array_like, shape = (M, D)
-        M 个“源点”的坐标。可以是输入通道的位置，或另一组神经元的位置。
-
-    sigma : float
-        高斯核的尺度（标准差）。标量、各向同性。若需要各向异性，请改成协方差形式。
-
-    amp : float, default=1.0
-        核的整体幅度系数（强度）。
-
-    norm : bool, default=True
-        是否做连续情形的“单位积分”归一化：除以 (sqrt(2π)*sigma)^D。
-        注意：在离散格点上这是近似归一；严格做法还需乘以体素体积。
-
-    periodic : bool, default=False
-        若为 True，则在周期盒中计算最短距离（最小镜像法）。
-
-    box_size : float 或 长度为 D 的序列, optional
-        每一维的周期长度 L。仅在 periodic=True 时必填。
-        标量表示各维相同；序列长度必须为 D。
-
-    返回
-    ----
-    K : np.ndarray, shape = (N, M)
-        高斯核权重矩阵，K[i, j] = amp * exp(-||x_i - y_j||^2 / (2 sigma^2)) / norm_const。
-        常用作：
-          - 递归权重 W_rc ：neuron_coords 对 src_coords=neuron_coords；
-          - 输入权重 W_in： neuron_coords 对 src_coords=输入通道坐标。
-
-    异常
-    ----
-    ValueError:
-        - periodic=True 但未提供 box_size；
-        - neuron_coords 与 src_coords 的维度 D 不相等。
-    """
-    d = 2
     if Wtype == 'Gaussian':
         sq = pairwise_sqdist(neuron_coords, src_coords, periodic=periodic, box_size=box_size)
         K = amp * np.exp(-0.5 * sq / (sigma**2)) 
@@ -128,7 +88,7 @@ def gaussian_kernel_from_coords(neuron_coords, src_coords, Wtype, sigma, Lambda=
         K = amp * np.exp(-0.5 * sq_dist_space / (sigma**2)) * np.exp(- Lambda * dist_time) 
         const = (np.sqrt(2*np.pi)*sigma)**(neuron_coords.shape[1]-1) / Lambda 
     
-    K = K / const
+    K = K / const - gamma
     return K
 
 @dataclass
@@ -149,6 +109,9 @@ class ExperienceCANN:
     lambda_in: float = None
     lambda_rc: float = None
     
+    gamma_in: float = 0.0
+    gamma_rc: float = 0.0
+    
     alpha: float = 0.3
     bias: np.ndarray = None
     gain: float = 1.0
@@ -159,8 +122,14 @@ class ExperienceCANN:
 
     def __post_init__(self):
         N = self.neuron_coords.shape[0]
-        self.W_rc = gaussian_kernel_from_coords(self.neuron_coords, self.neuron_coords, self.W_rc_type, self.sigma_rc, self.lambda_rc, self.W0_rc, self.periodic, self.box_size)
-        self.W_in = gaussian_kernel_from_coords(self.neuron_coords, self.channel_coords, self.W_in_type, self.sigma_in, self.lambda_in, self.W0_in, self.periodic, self.box_size)
+        self.W_rc = gaussian_kernel_from_coords(self.neuron_coords, self.neuron_coords, 
+                                                self.W_rc_type, self.sigma_rc, 
+                                                self.lambda_rc, self.W0_rc, self.gamma_rc,
+                                                self.periodic, self.box_size)
+        self.W_in = gaussian_kernel_from_coords(self.neuron_coords, self.channel_coords, 
+                                                self.W_in_type, self.sigma_in, 
+                                                self.lambda_in, self.W0_in, self.gamma_in,
+                                                self.periodic, self.box_size)
         if self.bias is None:
             # self.bias = np.zeros(N, dtype=float)
             self.bias = np.ones(N)
@@ -192,8 +161,8 @@ class ExperienceCANN:
         B, T, C = e.shape
         N = self.neuron_coords.shape[0]
         print('weight shape:', self.W_rc.shape, self.W_in.shape)
-        V = np.zeros((B, N), dtype=float)        # 初始化膜电位为零
-        r_all = np.zeros((B, T, N), dtype=float) # 记录所有时间步的输出
+        V = np.zeros((B, N), dtype=float)        # Initialise V to zero
+        r_all = np.zeros((B, T, N), dtype=float) # Record outputs for all time steps
         for t in range(T):
             V, r = self.step(V, e[:, t, :])
             r_all[:, t, :] = r
