@@ -1,5 +1,5 @@
 import numpy as np
-from .RNN2 import ExperienceCANN
+from .RNN import ExperienceCANN
 from .jacobian import *
 from ..func import plt_hs
 from matplotlib import pyplot as plt
@@ -10,8 +10,7 @@ from matplotlib import pyplot as plt
 load_data_type = '2TS_1_data'
 num_neuron = 512
 data = np.load(f'code/time_exp/{load_data_type}.npy', allow_pickle=True).item()
-print(data.keys())
-exp_vectors = data['test_labels'].cpu().numpy()  
+exp_vectors = data['test_inputs'].cpu().numpy()  
 print(exp_vectors.shape)
 
 
@@ -21,13 +20,19 @@ print(exp_vectors.shape)
 # # One dim ver
 # Nt = 512
 # neuron_coords = np.linspace(0, 1.0, Nt, endpoint=False).reshape(-1,1)   # (512, 1)
-# Three dims ver
-Nx, Ny, Nt = 8, 8, 8              
+# Two dims ver
+Nx, Ny = 32, 16
 y = np.linspace(0, 1.0, Ny, endpoint=False)
 x = np.linspace(0, 1.0, Nx, endpoint=False)
-t = np.linspace(0, 1.0, Nt, endpoint=False)
-Y, X, T = np.meshgrid(y, x, t, indexing='ij')
-neuron_coords = np.stack([X.ravel(), Y.ravel(), T.ravel()], axis=-1)   # (512, 3)
+Y, X = np.meshgrid(y, x, indexing='ij')
+neuron_coords = np.stack([X.ravel(), Y.ravel()], axis=-1)   # (512, 2)
+# Three dims ver
+# Nx, Ny, Nt = 8, 8, 8              
+# y = np.linspace(0, 1.0, Ny, endpoint=False)
+# x = np.linspace(0, 1.0, Nx, endpoint=False)
+# t = np.linspace(0, 1.0, Nt, endpoint=False)
+# Y, X, T = np.meshgrid(y, x, t, indexing='ij')
+# neuron_coords = np.stack([X.ravel(), Y.ravel(), T.ravel()], axis=-1)   # (512, 3)
 
 # ---- channels: 100 = 5 x 5 x 4 ----
 # # One dim ver
@@ -42,35 +47,19 @@ Yc, Xc, Tc = np.meshgrid(yc, xc, tc, indexing='ij')
 channel_coords = np.stack([Xc.ravel(), Yc.ravel(), Tc.ravel()], axis=-1)  # (100, 3)
 
 # ---- Parameters of the RNN ----
-params_dict = {'alpha': 0.01,
-    # Wrc
-    'W_rc_type': 'MexicanHat',
-    'sigmaE_rc': 0.57, 
-    'sigmaI_rc': 0.63,
-    'W0E_rc': 3.45,
-    'W0I_rc': 5.35,
-
-    'periodic': (True, True, False), 
-    'box_size': (1.0, 1.0, None),   
-}
-
-# 2) 建网（不训练，权重由高斯核直接给出）
 RNNnet = ExperienceCANN(
-    **params_dict,
+    alpha = 0.01,
     neuron_coords=neuron_coords,
     channel_coords=channel_coords,
-    divisive_norm=True
 )
 
-
-
-# 3) 前向积分（无训练）
 fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
-avg_fr = np.mean(fr, axis=0)   # (T,N)
+# avg_fr = np.mean(fr, axis=0)   # (T,N)
+avg_fr = fr[0]
 
 # Plot the hidden states
 fig, ax = plt.subplots(figsize=(5, 3))
-norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.001, 
+norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.1, 
                         #   mask_start=20, mask_end=150
                           )
 ax.set_xlabel('Time (s)')

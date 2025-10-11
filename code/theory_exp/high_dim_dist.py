@@ -1,5 +1,5 @@
 import numpy as np
-from .RNN import ExperienceCANN
+from .trash.RNN import ExperienceCANN
 from .jacobian import *
 from ..func import plt_hs
 from matplotlib import pyplot as plt
