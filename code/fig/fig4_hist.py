@@ -10,7 +10,10 @@ num_spatial_channels = [4, 10, 20, 40, 50, 60, 80, 90, 96]
 # Generate a histogram
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.bar(num_spatial_channels, num_place_cells, color=colours, width=3, edgecolor='black')
+# Plot a dashed line from (4,129) to (96,2)
+ax.plot([4, 96], [129, 2], linestyle='--', color='black', alpha=0.5)
 ax.set_xlabel('Number of temporal channels')
 ax.set_ylabel('Number of place cells')
 plt.tight_layout()
-plt.savefig('output/fig4_c.png', transparent=True)
+plt.savefig('output/fig4_c.png', transparent=True
+            )
