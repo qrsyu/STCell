@@ -1,6 +1,5 @@
 import numpy as np
 from .RNN import ExperienceCANN
-from .jacobian import *
 from ..func import plt_hs
 from matplotlib import pyplot as plt
 
@@ -58,13 +57,14 @@ fr = RNNnet.run(exp_vectors)   # -> shape (B,T,N)
 avg_fr = fr[0]
 
 # Plot the hidden states
-fig, ax = plt.subplots(figsize=(5, 3))
+fig, ax = plt.subplots(figsize=(4,3))
 norm_hs, fig, ax = plt_hs(avg_fr, ax=ax, fig=fig, min_fr=0.1, 
                         #   mask_start=20, mask_end=150
                           )
 ax.set_xlabel('Time (s)')
+ax.set_xlim(2,16)
 plt.tight_layout()
-plt.savefig(f'code/theory_exp/theory_rnn_{load_data_type}_{num_neuron}_hs.png', # transparent=True
+plt.savefig(f'code/theory_exp/theory_rnn_{load_data_type}_{num_neuron}_hs.png', transparent=True
             )
 
 

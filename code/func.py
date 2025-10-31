@@ -45,10 +45,11 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
             ax.add_patch(plt.Rectangle((m[0], 0), m[1]-m[0], norm_hs.shape[1], 
                                        color='white', alpha=0.3))
     
-    # Plot the colorbar
-    cbar = fig.colorbar(ax.images[0], ax=ax)
-    cbar.set_label('Normalized firing rate')
+    # # Plot the colorbar
+    # cbar = fig.colorbar(ax.images[0], ax=ax)
+    # cbar.set_label('Normalized firing rate')
     return norm_hs, fig, ax
+
 
 def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'salmon']):
     import seaborn as sns
@@ -122,7 +123,7 @@ def _compute_SIC(rate_map, occupancy_map, eps=1e-12):
     
     mean_rate = np.nansum(rate_map * occupancy_map)
     if mean_rate < eps:
-        print('False')
+        # print('False')
         return 0.0
 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -167,7 +168,7 @@ def ratemap_to_angle_profile(ratemaps, nbins=18, radius=None):
 
     if radius is None:
         radius = np.min([cx, cy, X-1-cx, X-1-cy])
-    print(radius)
+    # print(radius)
     
     circle_mask = dists <= radius
     

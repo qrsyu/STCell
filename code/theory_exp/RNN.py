@@ -41,7 +41,7 @@ class ExperienceCANN:
         N = self.neuron_coords.shape[0]   # hidden size
         C = self.channel_coords.shape[0]  # input size
 
-        self.W_rc = np.load('code/theory_exp/Wrc_theory.npy')
+        self.W_rc =  np.load('code/theory_exp/Wrc_theory.npy')
         # self.W_rc = trained_Wrc
         self.b_rc = np.zeros((N,), dtype=float)
         
