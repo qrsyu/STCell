@@ -207,3 +207,9 @@ code/nn4n
 # Research data
 data/
 result/
+trash/
+code/theory_exp/*.npy
+code/space_exp/*.npy
+code/space_exp/*.pth
+code/time_exp/*.npy
+code/time_exp/*.pth
