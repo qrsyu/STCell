@@ -214,3 +214,4 @@ code/space_exp/*.pth
 code/time_exp/*.npy
 code/time_exp/*.pthcode/space_exp/square_room_data.npy
 code/time_exp/2TS_1_rnn.pth
+code/space_exp/2WSMS_1_data.npy
