@@ -54,7 +54,7 @@ class ExperienceCANN:
         ax.set_ylabel('Neurons')
         plt.tight_layout()
         plt.savefig('code/theory_exp/Wrc_theory.png')
-        plt.close()
+        plt.close
         
         # Either uniform or normal initialization works
         # self.W_in = np.random.uniform(-np.sqrt(1/C), np.sqrt(1/C), size=(N, C)).astype(np.float32)
