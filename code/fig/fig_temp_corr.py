@@ -1,8 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
-import seaborn as sns
-from func import plt_temp_corr
+from code.func import plt_temp_corr
 
 
 load_data_type = '2TS2WSMS_vary'
@@ -27,7 +26,7 @@ corr_starts = [item - warmup/10 for item in corr_starts]
 corr_ends   = [item - warmup/10 for item in corr_ends]
 
 
-fig, axs = plt.subplots(figsize=(10, 5*2), constrained_layout=True)
+fig, axs = plt.subplots(figsize=(5, 5*2), constrained_layout=True)
 
 gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0)
 for idx, item in enumerate([2, 10, 50, 90, 98]):
@@ -41,7 +40,7 @@ for idx, item in enumerate([2, 10, 50, 90, 98]):
     ax = fig.add_subplot(gs[idx, 0])
     
     _, ax = plt_temp_corr(avg_hs, fig=fig, ax=ax, corr_inteval=[corr_starts[idx], corr_ends[idx]],
-                          corr_color=['grey', colours[idx],])
+                          corr_color=['silver', colours[idx],])
     
     if idx < len(colours)-1:
         ax.set_xticks([])
@@ -53,4 +52,4 @@ for idx, item in enumerate([2, 10, 50, 90, 98]):
 fig.delaxes(fig.get_axes()[0])
 
 # plt.tight_layout()
-plt.savefig(f'output/fig_temp_corr_{load_data_type}')
+plt.savefig(f'code/fig/fig_temp_corr_{load_data_type}', dpi=500, transparent=True)

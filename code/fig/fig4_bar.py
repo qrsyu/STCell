@@ -41,4 +41,4 @@ plt.xlabel('Temporal channels')
 
 
 plt.tight_layout()
-plt.savefig('output/fig4_b.png', transparent=True)
+plt.savefig('code/fig/fig4_bar.png', transparent=True, dpi=500)
