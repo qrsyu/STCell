@@ -18,7 +18,7 @@ rows = [
 # each trial has one colours
 colours = ['#274753', '#297270', '#299D8F', '#8AB07C',  '#E7C66B', '#F3A361']
 
-fig, ax = plt.subplots(figsize=(5, 4))
+fig, ax = plt.subplots(figsize=(5, 4), dpi=500)
 
 yticks = []
 yticklabels = []
@@ -57,4 +57,4 @@ plt.xlabel('Time (s)')
 
 
 plt.tight_layout()
-plt.savefig('output/fig3_b.png', transparent=True)
+plt.savefig('code/fig/fig3_bar.png', transparent=True)
