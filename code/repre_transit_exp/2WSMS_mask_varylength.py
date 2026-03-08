@@ -1,15 +1,18 @@
-"""The pure space task:
+"""The pure spacetime task:
 The experiment simulates the agent travels in a circular track for two turns.
-The RNN is trained to predict the sensory experience in the second turn given the first turn.
+The RNN is trained to predict the partial sensory experience in the second 
+turn given the partial first turn.
+The duration of presenting spatial signals in the first turn varies. 
 """
 
 import os
-import torch
 from rtgym import RatatouGym
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from func import generate_circular_trajectories
+from ..func import generate_circular_trajectories
+
+load_data_type = '2WSMS_mask_vary0' 
 
 # ===========================================================================================
 # Set up the arena and sensory input
@@ -47,8 +50,6 @@ sensory_profile = {
 gym.set_sensory_from_profile(sensory_profile)
 gym.set_behavior_from_profile(behavior_profile)
 
-gym.trial.vis_sensory()
-
 arena_map = gym.arena_map
 
 time_pts = 100
@@ -58,8 +59,6 @@ traj = generate_circular_trajectories(arena_map, R_out, R_in, vel_mean, vel_std,
 # Generate (Batch size) trial
 gym.trial.new_trial(duration=0, external_traj=traj)
 
-# gym.trial.vis_sensory()
-
 # Get some specific responses within a time range, the key should be the same as the sensory profile
 space_res = gym.trial.get_responses(keys='wsm')
 print('space responses:', space_res.shape)
@@ -67,6 +66,20 @@ print('space responses:', space_res.shape)
 # ===========================================================================================
 # Make input and label
 # ===========================================================================================
+
+# --------------------------------------------- #
+# Trial 0: 0-0.5,     0.5-0.1                   #
+# Trial 1: 0.05-0.45, 0.55-0.95                 $
+# Trial 2: 0.1-0.4,   0.6-0.9                   #
+# Trial 3: 0.15-0.35, 0.65-0.85                 #
+# Trial 4: 0.2-0.3,   0.7-0.8                   #
+# Trial 5: 0.25-0.3,  0.75-0.8                  #
+# --------------------------------------------- #
+
+# X, Y = 0, 0
+# space_res[:, :X,   :] = 0                 # Mask the first X time steps to zero
+# space_res[:, int(50-Y):int(50+X), :] = 0  # Mask the middle 2X time steps to zero
+# space_res[:, -Y:,  :] = 0                 # Mask the last X time steps
 
 labels = space_res.copy()
 
@@ -82,6 +95,7 @@ mask = Masking(
                 # device=torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available
                 )
 inputs = mask.mask(inputs).numpy()
+inputs[:, int(inputs.shape[1]*0.5):, :] = 0 # Mask the second half of the trajectory
 
 # Split the data to training and test set along axis=1
 indices = np.arange(inputs.shape[0])
@@ -104,17 +118,17 @@ for key, val in traj.items():
 # Plot the sensory
 # ===========================================================================================
 
-plot_batch_idx = 0  
-fig, axs = plt.subplots(1, 2, figsize=(15, 5), sharey=True)
-# Plot the entire heat map, left input and right label
-# -------------------------------------------------------------------------------------------
-axs[0].imshow(inputs[plot_batch_idx].T, aspect='auto', cmap='hot')
-axs[0].set_title('Input (Masked)')
-axs[0].set_xlabel('Time (ms)')
-axs[0].set_ylabel('Cell Index')
-axs[1].imshow(labels[plot_batch_idx].T, aspect='auto', cmap='hot')
-axs[1].set_title('Label (Unmasked)')
-axs[1].set_xlabel('Time (ms)')
+# plot_batch_idx = 0  
+# fig, axs = plt.subplots(1, 2, figsize=(15, 5), sharey=True)
+# # Plot the entire heat map, left input and right label
+# # -------------------------------------------------------------------------------------------
+# axs[0].imshow(inputs[plot_batch_idx].T, aspect='auto', cmap='hot')
+# axs[0].set_title('Input (Masked)')
+# axs[0].set_xlabel('Time (ms)')
+# axs[0].set_ylabel('Cell Index')
+# axs[1].imshow(labels[plot_batch_idx].T, aspect='auto', cmap='hot')
+# axs[1].set_title('Label (Unmasked)')
+# axs[1].set_xlabel('Time (ms)')
 
 # # Plot single channel
 # # -------------------------------------------------------------------------------------------
@@ -126,9 +140,7 @@ axs[1].set_xlabel('Time (ms)')
 # axs[1].plot(labels[plot_batch_idx, :, 2], label='Label Channel 3')
 # plt.legend()
 
-save_dir = f'data/'
-os.makedirs(save_dir, exist_ok=True)
-plt.savefig(f'{save_dir}/2WSMS_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
+# plt.savefig(f'{save_dir}/{load_data_type}_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
 
 # ===========================================================================================
 # Save the sensory
@@ -143,5 +155,7 @@ save_dict = {
             'train_traj':   train_traj,
             'test_traj':    test_traj,
         }
-np.save(f'{save_dir}/2WSMS', save_dict)
+save_dir = f'data/'
+os.makedirs(save_dir, exist_ok=True)
+np.save(f'{save_dir}/{load_data_type}', save_dict)
 print('Saved!')

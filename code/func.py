@@ -3,6 +3,111 @@ import numpy as np
 from tqdm import tqdm
 
 
+def generate_circular_trajectories(arena_map, R_out, R_in,
+                                    mean_vel, std_vel, # Angular veloity
+                                    time_points=100, batch_size=1, visualize=True):
+    import numpy as np
+    from matplotlib import pyplot as plt
+    
+    dim = arena_map.shape[0]
+    y_c, x_c = int(dim/2), int(dim/2)
+    loop_width = R_out - R_in
+    avg_R = (R_out + R_in) / 2
+    edge = loop_width / 6
+
+    # Initiate trajectories
+    trajectories = np.zeros((batch_size, time_points, 2))
+    displacements = np.zeros((batch_size, time_points, 2))
+    hds = np.zeros((batch_size, time_points, 1))
+
+    current_batch = 0
+    while current_batch < batch_size:
+        i = current_batch
+
+        # Initial positions
+        R_0 = np.random.uniform(R_in+edge, R_out-edge)
+        theta_0 = np.random.uniform(0, 2*np.pi)
+
+        # Angular velocity generation: omega(t)
+        omega = np.random.normal(mean_vel, std_vel, time_points) / avg_R
+        # Angular displacement: theta(t)
+        theta = np.cumsum(omega) + theta_0
+
+        # Insert variations
+        delta_R = (edge/2) * np.sin(np.linspace(0, np.pi*4, time_points)) # Narrow the range of R to ensure not hitting the wall
+        # Radial displacement: R(t)
+        R = R_0 + delta_R
+
+        # Simulate trajectory
+        x_traj = x_c + R*np.cos(theta)
+        y_traj = y_c + R*np.sin(theta)
+
+        # Add noise
+        x_traj += np.random.uniform(-1, 1, size=time_points)
+        y_traj += np.random.uniform(-1, 1, size=time_points)
+
+        # Ensure all sampled points are valid
+        valid_mask = ( (0 <= x_traj) & (x_traj < dim) &
+                       (0 <= y_traj) & (y_traj < dim) &
+                       (arena_map[y_traj.astype(int), x_traj.astype(int)] == 0) )
+        if np.all(valid_mask):
+            # print(f"Trajectory {i+1} is valid.")
+
+            trajectories[i, :, 0] = x_traj
+            trajectories[i, :, 1] = y_traj
+            # Generate displacements
+            dx, dy = np.diff(x_traj), np.diff(y_traj)
+            displacements[i, :len(x_traj)-1, 0] = dx
+            displacements[i, :len(y_traj)-1, 1] = dy
+            # Generate head directions
+            hds[i, :len(x_traj)-1, 0] = np.arctan2(dy, dx)
+
+            current_batch += 1
+        else:
+            pass
+
+    # Visualize
+    if visualize:
+        plt.figure(figsize=(6, 6))
+        plt.imshow(arena_map, cmap="gray_r", origin="lower")  # 显示 arena
+        for i in range(batch_size):
+            plt.plot(trajectories[i, :, 0], trajectories[i, :, 1], label=f'Trajectory {i+1}')
+        plt.scatter([x_c], [y_c], c='blue', marker='o', label="Center")  # 圆心
+        plt.legend()
+        plt.title("Circular Trajectories in Arena")
+        plt.show()
+
+    # Return trajectories data
+    Traj = {'coords': trajectories, 'hds': hds, 'disps': displacements}
+
+    return Traj
+
+
+def custom_loss(recon, target, firing_rates, lambda_mse, lambda_r):
+    """
+    Args:
+        recon: [batch, time, dim] — reconstructed experience vectors (ŷ)
+        target: [batch, time, dim] — ground truth experience vectors (y)
+        firing_rates: [batch, time, N] — firing rates of all hidden neurons
+    """
+    import torch
+    # Shape values
+    B, T, D = target.shape
+    N = firing_rates[0].shape[2]
+
+    # 1. Reconstruction MSE Loss
+    mse = torch.sum((recon - target) ** 2) / (B * T * D)
+    # mse = torch.nn.MSELoss()
+    # mse = mse(recon, target)
+
+    # 2. Firing rate regularization term
+    reg = torch.sum(torch.sum(firing_rates[0], axis=(0,1))**2 / (B * T)) / N
+
+    total_loss = lambda_mse * mse + lambda_r * reg
+    # print(lambda_mse * mse, lambda_r * reg)
+    return total_loss, lambda_mse * mse, lambda_r * reg
+
+
 def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
 
     time_points = hs.shape[0]
@@ -51,9 +156,33 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
     return norm_hs, fig, ax
 
 
+def plt_corr(time_pts, widths, fig, ax):
+    
+    import seaborn as sns
+    from scipy.optimize import curve_fit
+    def fit_func(x, a, b):
+        return a * x + b
+    
+    popt, _ = curve_fit(fit_func, time_pts, widths)  
+    print(f'Fitted gradient: {popt[0]:.4f}')
+    
+    rval = np.corrcoef(time_pts, widths)[0,1]
+    print(f'Correlation coefficient: {rval}')
+    sns.regplot(x=time_pts, y=widths,
+                scatter=False, 
+                color='black',
+                line_kws={"linewidth":1, "linestyle":"-"},
+                ci=95,
+                label=f'r = {rval:.2f}; slope = {popt[0]:.4f}')
+
+    return fig, ax
+
+
 def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'salmon']):
     import seaborn as sns
     from scipy.optimize import curve_fit
+    def fit_func(x, a, b):
+        return a * x + b
 
     max_times = np.argmax(hs, axis=0)
     max_times = max_times / 10  # Convert to seconds
@@ -67,8 +196,7 @@ def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'sa
 
     plt.scatter(max_times, firing_widths, c=colors, s=5)
     
-    def fit_func(x, a, b):
-        return a * x + b
+    
     popt, pcov = curve_fit(fit_func, max_times, firing_widths)
     print(f'Fitted gradient: {popt[0]:.4f}')
 
@@ -82,8 +210,6 @@ def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'sa
             line_kws={"linewidth":1, "linestyle":"-"},
             ci=95,
             label=f'r = {rval:.2f}, slope = {popt[0]:.2f}')
-
-    
 
     # plt.xlabel('Maximum firing time (s)')
     plt.ylabel("Firing width (s)")
