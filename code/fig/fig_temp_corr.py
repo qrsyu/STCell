@@ -26,7 +26,7 @@ corr_starts = [item - warmup/10 for item in corr_starts]
 corr_ends   = [item - warmup/10 for item in corr_ends]
 
 
-fig, axs = plt.subplots(figsize=(5, 5*2), constrained_layout=True)
+fig, axs = plt.subplots(figsize=(3.5, 4*2), constrained_layout=True)
 
 gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0)
 for idx, item in enumerate([2, 10, 50, 90, 98]):
