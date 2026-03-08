@@ -61,4 +61,4 @@ plt.xlabel('Time (s)')
 
 
 plt.tight_layout()
-plt.savefig('fig2_b.png')
+plt.savefig('code/fig/fig2_bar.png')

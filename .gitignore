@@ -206,7 +206,7 @@ code/nn4n
 
 # Research data
 data/
-result/
+fig-place-cells/
 trash/
 code/theory_exp/*.npy
 code/space_exp/*.npy
