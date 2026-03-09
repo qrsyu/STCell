@@ -15,7 +15,7 @@ pip install .
 
 ## Acknowledgement
 
-Parts of the code in `../code/RatatouGym/` are adapted from the original 
+Parts of the code in `../code/rtgym/` are adapted from the original 
 [RatatouGym](https://github.com/zhaozewang/rtgym) repository. 
 We thank the authors for open-sourcing their implementation.
 
