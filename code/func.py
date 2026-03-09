@@ -178,48 +178,6 @@ def plt_corr(time_pts, widths, fig, ax):
     return fig, ax
 
 
-# def plt_temp_corr(hs, fig, ax, corr_inteval=[0, 100], corr_color=['skyblue', 'salmon']):
-#     import seaborn as sns
-#     from scipy.optimize import curve_fit
-#     def fit_func(x, a, b):
-#         return a * x + b
-
-#     max_times = np.argmax(hs, axis=0)
-#     max_times = max_times / 10  # Convert to seconds
-#     # Get the temporal firing width of each neuron, the threshold is 0.1 of the maximum firing rate
-#     firing_widths = np.zeros(hs.shape[1])
-#     for i in range(hs.shape[1]):
-#         firing_widths[i] = np.sum(hs[:, i] > 1E-1)
-#         # firing_widths[i] = np.sum(norm_hs[:, i] > 0.5 * np.max(norm_hs[:, i]))
-    
-#     colors = [corr_color[0] if t < corr_inteval[0] or t > corr_inteval[1] else corr_color[1] for t in max_times]
-
-#     plt.scatter(max_times, firing_widths, c=colors, s=5)
-    
-    
-#     popt, pcov = curve_fit(fit_func, max_times, firing_widths)
-#     print(f'Fitted gradient: {popt[0]:.4f}')
-
-#     rval = np.corrcoef(max_times[(max_times >= corr_inteval[0]) & (max_times < corr_inteval[1])], 
-#                    firing_widths[(max_times >= corr_inteval[0]) & (max_times < corr_inteval[1])])[0,1]
-#     print(f'Correlation coefficient: {rval}')
-#     sns.regplot(x=max_times[(max_times >= corr_inteval[0]) & (max_times < corr_inteval[1])], 
-#             y=firing_widths[(max_times >= corr_inteval[0]) & (max_times < corr_inteval[1])],
-#             scatter=False, 
-#             color='black',
-#             line_kws={"linewidth":1, "linestyle":"-"},
-#             ci=95,
-#             label=f'r = {rval:.2f}, slope = {popt[0]:.2f}')
-
-#     # plt.xlabel('Maximum firing time (s)')
-#     plt.ylabel("Firing width (s)")
-#     plt.legend(loc='upper right')
-    
-#     ax.set_xticks(np.linspace(0, hs.shape[0]/10, 6))
-     
-#     return fig, ax
-
-
 def compute_occupancy(pos, bins):
     H, W = bins
     occ_map = np.zeros((H, W))
