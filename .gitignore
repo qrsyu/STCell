@@ -208,3 +208,9 @@ code/space_exp/*.npy
 code/space_exp/*.pth
 code/time_exp/*.npy
 code/time_exp/*.pth
+code/sq_space_exp/*.npy
+code/sq_space_exp/*.pth
+
+# Binary training artifacts
+*.npy
+*.pth
