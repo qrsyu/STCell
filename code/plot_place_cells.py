@@ -73,8 +73,8 @@ select_indices = np.where(place_cells)[0]
 # Plot the ratemap
 # ===========================================================================================
 
-# Convert all zero to nan
-ratemap[ratemap == 0] = np.nan
+# # Convert all zero to nan (optional)
+# ratemap[ratemap == 0] = np.nan
 
 # Plot the ratemap
 # select_indices = range(args.num_neuron)
