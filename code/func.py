@@ -108,7 +108,7 @@ def custom_loss(recon, target, firing_rates, lambda_mse, lambda_r):
     return total_loss, lambda_mse * mse, lambda_r * reg
 
 
-def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
+def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, return_idx=False):
 
     time_points = hs.shape[0]
 
@@ -153,7 +153,10 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None):
     # # Plot the colorbar
     # cbar = fig.colorbar(ax.images[0], ax=ax)
     # cbar.set_label('Normalized firing rate')
-    return norm_hs, fig, ax
+    if return_idx:
+        return norm_hs, fig, ax, neuron_indices[sorted_neuron_indices]
+    else:
+        return norm_hs, fig, ax
 
 
 def plt_corr(time_pts, widths, fig, ax):
