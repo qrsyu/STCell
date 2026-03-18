@@ -18,21 +18,32 @@ parser.add_argument('--time_end',       default=-1,   type=int)
 args = parser.parse_args()
 
 
-data = np.load(f'data/{args.load_data_type}.npy', allow_pickle=True).item()
-hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
+# For npy file:
+# --------------------------------------------------------------------------------------------
+# data = np.load(f'data/{args.load_data_type}.npy', allow_pickle=True).item()
+# hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
+# select_hs = hidden_states[:, args.time_start:args.time_end, :]
+# select_coords = data['test_traj']['coords'][:, args.time_start:args.time_end, :]
+# arena_map = data['arena_map']
 
-select_hs = hidden_states[:, args.time_start:args.time_end, :]
-select_coords = data['test_traj']['coords'][:, args.time_start:args.time_end, :]
+# For npz file:
+# --------------------------------------------------------------------------------------------
+with np.load(f'data/{args.load_data_type}.npz', allow_pickle=True) as data:
+    hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
+    select_hs = hidden_states[:, args.time_start:args.time_end, :]
+    test_traj = data['test_traj'].item()
+    select_coords = test_traj['coords'][:, args.time_start:args.time_end, :]
+    arena_map = data['arena_map']
+
 
 # ===========================================================================================
 # Calculate the occupancy map
 # ===========================================================================================
 
-occupancy = compute_occupancy(select_coords, bins=data['arena_map'].shape)
+occupancy = compute_occupancy(select_coords, bins=arena_map.shape)
 print('Occupancy has the shape of the arena: ', occupancy.shape)
 
 # Plot the occupancy (有用)
-# --------------------------------------------------------------------------------------------
 fig, ax = plt.subplots(1, 1, figsize=(4.9, 4))
 cbar = plt.colorbar(ax.imshow(occupancy, cmap='jet', aspect='auto'), 
                     ax=ax, fraction=0.046, pad=0.04, orientation='vertical', location='left')
@@ -53,9 +64,19 @@ plt.close(fig)
 # Compute the ratemap
 # ===========================================================================================
 
-aggregator = RatemapAggregator(data['arena_map'], device='cuda')
+aggregator = RatemapAggregator(arena_map, device='cuda')
 
-aggregator.update(select_hs, select_coords)
+# For large data (npz)
+# --------------------------------------------------------------------------------------------
+select_hs = select_hs.astype(np.float16)
+select_coords = select_coords.astype(np.float16)
+for i in range(10):
+    aggregator.update(select_hs[i*100:(i+1)*100], select_coords[i*100:(i+1)*100])
+
+# For small data (npy)
+# --------------------------------------------------------------------------------------------
+# aggregator.update(select_hs, select_coords)
+
 ratemap = aggregator.get_ratemap().cpu().numpy()
 print(ratemap.shape)
 
