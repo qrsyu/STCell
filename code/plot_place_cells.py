@@ -68,8 +68,6 @@ aggregator = RatemapAggregator(arena_map, device='cuda')
 
 # For large data (npz)
 # --------------------------------------------------------------------------------------------
-select_hs = select_hs.astype(np.float16)
-select_coords = select_coords.astype(np.float16)
 for i in range(10):
     aggregator.update(select_hs[i*100:(i+1)*100], select_coords[i*100:(i+1)*100])
 
