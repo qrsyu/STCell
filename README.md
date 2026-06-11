@@ -3,13 +3,17 @@ Hippocampal neurons encode both spatial location (place cells) and elapsed time 
 
 ## Install
 
-In order to run the simulations, clone the current repository and then install [nn4n](https://github.com/NN4Neurosim/nn4n) in `code`:
+In order to run the simulations, clone the current repository and then install [nn4n](https://github.com/NN4Neurosim/nn4n):
 ```bash
 git clone https://github.com/qrsyu/STCell.git
 cd STCell/code
 git clone --single-branch --branch v1.2.1 https://github.com/NN4Neurosim/nn4n.git 
 cd nn4n
 pip install -e .
+```
+The working directory should be `~/STCell/`, for example:
+```bash
+(myenv) name@ip STCell % python3 code/fig/fig2_bar.py 
 ```
 
 ## Acknowledgement
