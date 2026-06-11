@@ -3,7 +3,8 @@ The experiment simulates the agent travels in a circular track for two turns.
 The RNN is trained to predict the sensory experience in the second turn given the first turn.
 """
 
-import os
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from rtgym import RatatouGym
 import numpy as np
 from matplotlib import pyplot as plt

@@ -1,7 +1,9 @@
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
-from code.func import plt_temp_corr
+from func import plt_corr
 
 
 load_data_type = '2TS2WSMS_vary'
@@ -39,8 +41,9 @@ for idx, item in enumerate([2, 10, 50, 90, 98]):
     
     ax = fig.add_subplot(gs[idx, 0])
     
-    _, ax = plt_temp_corr(avg_hs, fig=fig, ax=ax, corr_inteval=[corr_starts[idx], corr_ends[idx]],
-                          corr_color=['silver', colours[idx],])
+    # _, ax = plt_corr(avg_hs, fig=fig, ax=ax, corr_inteval=[corr_starts[idx], corr_ends[idx]],
+    #                       corr_color=['silver', colours[idx],])
+    _, ax = plt_corr(np.linspace(0, 10, 100), avg_hs, fig=fig, ax=ax)
     
     if idx < len(colours)-1:
         ax.set_xticks([])

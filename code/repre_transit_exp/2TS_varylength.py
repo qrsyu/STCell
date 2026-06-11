@@ -4,7 +4,8 @@ The RNN is trained to predict the second event
 given the first event.
 """
 
-import os
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from rtgym import RatatouGym
 import numpy as np
 from matplotlib import pyplot as plt

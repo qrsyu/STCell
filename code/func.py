@@ -110,8 +110,6 @@ def custom_loss(recon, target, firing_rates, lambda_mse, lambda_r):
 
 def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, return_idx=False):
 
-    time_points = hs.shape[0]
-
     # Select neurons with mean firing rate > 0.1
     mean_fr = hs.mean(axis=0)
     # Get the index where mean_fr > min_fr
@@ -132,7 +130,7 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, return_idx=False):
     max_time = np.argmax(norm_hs, axis=0)
     sorted_neuron_indices = np.argsort(max_time)
     norm_hs = norm_hs[:, sorted_neuron_indices]
-    num_neurons = norm_hs.shape[1]
+    time_points, num_neurons = norm_hs.shape
     
     # Plot the normalized hs
     ax.imshow(norm_hs.T, aspect='auto', cmap='jet',  
@@ -157,7 +155,8 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, return_idx=False):
         return norm_hs, fig, ax, neuron_indices[sorted_neuron_indices]
     else:
         return norm_hs, fig, ax
-
+    
+    
 
 def plt_corr(time_pts, widths, fig, ax):
     

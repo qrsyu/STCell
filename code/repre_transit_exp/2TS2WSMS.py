@@ -1,12 +1,13 @@
 """The time task + the space task:
 """
 
-import os
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from rtgym import RatatouGym
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from ..func import generate_circular_trajectories
+from func import generate_circular_trajectories
 
 chose_idx = 10
 n_times = [98, 96, 90, 80, 60, 50, 40, 20, 10, 4, 2]
@@ -215,5 +216,6 @@ save_dict = {
             'train_traj':   train_traj,
             'test_traj':    test_traj,
         }
+os.makedirs('data', exist_ok=True)
 np.save(f'data/{load_data_type}', save_dict)
 print('Saved!')

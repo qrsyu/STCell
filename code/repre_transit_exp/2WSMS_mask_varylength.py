@@ -5,12 +5,13 @@ turn given the partial first turn.
 The duration of presenting spatial signals in the first turn varies. 
 """
 
-import os
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from rtgym import RatatouGym
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
-from ..func import generate_circular_trajectories
+from func import generate_circular_trajectories
 
 load_data_type = '2WSMS_mask_vary0' 
 
