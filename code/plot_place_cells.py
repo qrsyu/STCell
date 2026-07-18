@@ -9,7 +9,8 @@ import os
 
 # Input arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('--load_data_type', default=None, type=str)
+parser.add_argument('--load_data',      default=None, type=str)
+parser.add_argument('--data_type',      default=None, type=str)
 parser.add_argument('--num_neuron',     default=512,  type=int)
 parser.add_argument('--theory',         default='',   type=str)
 # Optional: select half of the time points
@@ -17,23 +18,29 @@ parser.add_argument('--time_start',     default=0,    type=int)
 parser.add_argument('--time_end',       default=-1,   type=int)
 args = parser.parse_args()
 
+if args.data_type == 'npy':
 
-# For npy file:
-# --------------------------------------------------------------------------------------------
-# data = np.load(f'data/{args.load_data_type}.npy', allow_pickle=True).item()
-# hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
-# select_hs = hidden_states[:, args.time_start:args.time_end, :]
-# select_coords = data['test_traj']['coords'][:, args.time_start:args.time_end, :]
-# arena_map = data['arena_map']
-
-# For npz file:
-# --------------------------------------------------------------------------------------------
-with np.load(f'data/{args.load_data_type}.npz', allow_pickle=True) as data:
+    # For npy file:
+    # --------------------------------------------------------------------------------------------
+    data = np.load(f'data/{args.load_data}.npy', allow_pickle=True).item()
     hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
     select_hs = hidden_states[:, args.time_start:args.time_end, :]
-    test_traj = data['test_traj'].item()
-    select_coords = test_traj['coords'][:, args.time_start:args.time_end, :]
+    select_coords = data['test_traj']['coords'][:, args.time_start:args.time_end, :]
     arena_map = data['arena_map']
+
+elif args.data_type == 'npz':
+
+    # For npz file:
+    # --------------------------------------------------------------------------------------------
+    with np.load(f'data/{args.load_data}.npz', allow_pickle=True) as data:
+        hidden_states = data[f'{args.theory}hidden_states_{args.num_neuron}']
+        select_hs = hidden_states[:, args.time_start:args.time_end, :]
+        test_traj = data['test_traj'].item()
+        select_coords = test_traj['coords'][:, args.time_start:args.time_end, :]
+        arena_map = data['arena_map']
+
+else:
+    raise ValueError("Invalid data_type. Please choose 'npy' or 'npz'.")
 
 
 # ===========================================================================================
@@ -55,7 +62,7 @@ cbar.ax.yaxis.set_label_position('left')
 ax.imshow(occupancy, cmap='jet', aspect='auto')
 ax.axis('off')
 plt.tight_layout()
-save_dir = f'fig-place-cells/{args.load_data_type}_{args.num_neuron}/{args.theory}ratemap_time{args.time_start}-{args.time_end}/'
+save_dir = f'fig-place-cells/{args.load_data}_{args.num_neuron}/{args.theory}ratemap_time{args.time_start}_{args.time_end}/'
 os.makedirs(save_dir, exist_ok=True)
 plt.savefig(f'{save_dir}/occupancy.png', transparent=True)
 plt.close(fig)
@@ -64,16 +71,24 @@ plt.close(fig)
 # Compute the ratemap
 # ===========================================================================================
 
-aggregator = RatemapAggregator(arena_map, device='cuda')
+import torch
+device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
+aggregator = RatemapAggregator(arena_map, device=device)
+# If device is mps. change select_coords to float32 to avoid errors
+select_coords = select_coords.astype(np.float32) if device.type == 'mps' else select_coords
 
-# For large data (npz)
-# --------------------------------------------------------------------------------------------
-for i in range(10):
-    aggregator.update(select_hs[i*100:(i+1)*100], select_coords[i*100:(i+1)*100])
+if args.data_type == 'npz':
 
-# For small data (npy)
-# --------------------------------------------------------------------------------------------
-# aggregator.update(select_hs, select_coords)
+    # For large data (npz)
+    # --------------------------------------------------------------------------------------------
+    for i in range(10):
+        aggregator.update(select_hs[i*100:(i+1)*100], select_coords[i*100:(i+1)*100])
+
+elif args.data_type == 'npy':
+
+    # For small data (npy)
+    # --------------------------------------------------------------------------------------------
+    aggregator.update(select_hs, select_coords)
 
 ratemap = aggregator.get_ratemap().cpu().numpy()
 print(ratemap.shape)
@@ -92,8 +107,8 @@ select_indices = np.where(place_cells)[0]
 # Plot the ratemap
 # ===========================================================================================
 
-# # Convert all zero to nan (optional)
-# ratemap[ratemap == 0] = np.nan
+# Convert all zero to nan (optional)
+ratemap[ratemap == 0] = np.nan
 
 # Plot the ratemap
 # select_indices = range(args.num_neuron)

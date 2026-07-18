@@ -7,7 +7,6 @@ given the first event.
 import os
 from rtgym import RatatouGym
 import numpy as np
-from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 # ===========================================================================================
@@ -15,15 +14,18 @@ from sklearn.model_selection import train_test_split
 # ===========================================================================================
 
 # ------------------------------------------- #
-# Trial 0: (0.25, 0.75),  0.05                #
-# Trial 1: (0.2, 0.7),    0.1                 #
-# Trial 2: (0.15, 0.65),  0.2                 #
-# Trial 3: (0.1, 0.6),    0.3                 #
-# Trial 4: (0.05, 0.55),  0.4                 #
-# Trial 5: (0, 0.5),      0.5                 #
+# trial    (X,    Y)      width               #
+# 0:       (0.25, 0.75),  0.05                #
+# 1:       (0.2,  0.7),   0.1                 #
+# 2:       (0.15, 0.65),  0.2                 #
+# 3:       (0.1,  0.6),   0.3                 #
+# 4:       (0.05, 0.55),  0.4                 #
+# 5:       (0,    0.5),   0.5                 #
 # ------------------------------------------- #
 
-load_data_type = '2TS_vary0'
+trial, X, Y, width = 0, 0.25, 0.75, 0.05
+
+load_data_type = f'2TS_vary{trial}'
 
 temp_reso, spat_reso = 100, 1 # Temp reso: 100ms; Spatial reso: 1cm
 gym = RatatouGym(temporal_resolution=temp_reso, spatial_resolution=spat_reso)
@@ -51,8 +53,8 @@ sensory_profile = {
                     "time": {
                             "type":        "time_cell",
                             "n_cells":     n_cells,
-                            "event_onset": [0.25, 0.75],
-                            "event_width": [0.05, 0.05],
+                            "event_onset": [X, Y],
+                            "event_width": [width, width],
                             "event_onset_sigma": [0.01, 0.01],
                             "temp_events": [temp_event_1, temp_event_2], 
                             "sigma":       0.5,    # sigma of Gaussian noise
@@ -126,6 +128,8 @@ for key, val in traj.items():
 # ===========================================================================================
 # Plot the sensory
 # ===========================================================================================
+
+# from matplotlib import pyplot as plt
 
 # plot_batch_idx = 0  
 # fig, axs = plt.subplots(1, 2, figsize=(15, 5), sharey=True)

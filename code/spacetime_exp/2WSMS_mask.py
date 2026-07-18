@@ -3,14 +3,15 @@ The experiment simulates the agent travels in a circular track for two turns.
 The RNN is trained to predict the sensory experience in the second turn given the first turn.
 """
 
-import os
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from rtgym import RatatouGym
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from func import generate_circular_trajectories
 
-load_data_type = '2WSMS_mask' 
+load_data = '2WSMS_mask' 
 
 # ===========================================================================================
 # Set up the arena and sensory input
@@ -123,10 +124,7 @@ axs[1].set_xlabel('Time (ms)')
 # axs[1].plot(labels[plot_batch_idx, :, 1], label='Label Channel 2')
 # axs[1].plot(labels[plot_batch_idx, :, 2], label='Label Channel 3')
 # plt.legend()
-
-save_dir = f'data/'
-os.makedirs(save_dir, exist_ok=True)
-plt.savefig(f'{save_dir}/{load_data_type}_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
+# plt.savefig(f'{save_dir}/{load_data}_sensory_{plot_batch_idx}.png', dpi=300, bbox_inches='tight')
 
 # ===========================================================================================
 # Save the sensory
@@ -141,5 +139,7 @@ save_dict = {
             'train_traj':   train_traj,
             'test_traj':    test_traj,
         }
-np.save(f'{save_dir}/{load_data_type}', save_dict)
+save_dir = f'data/'
+os.makedirs(save_dir, exist_ok=True)
+np.save(f'{save_dir}/{load_data}', save_dict)
 print('Saved!')

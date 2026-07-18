@@ -13,5 +13,5 @@ ax.plot(num_spatial_channels, num_place_cells, color='black', marker='o', marker
 ax.set_xlabel('Trial')
 ax.set_ylabel('Number of place cells')
 plt.tight_layout()
-plt.savefig('code/fig/fig3_place_cells.png', transparent=True)
+plt.savefig('code/fig/fig4_place_cells.png', transparent=False, dpi=500)
 print('done')

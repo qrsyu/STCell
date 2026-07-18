@@ -1,17 +1,18 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
-from code.func import plt_hs
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from func import plt_hs
 
 
 
 ### 2TS2WSMS_vary
 # ----------------------------------------------------------------------------
-load_data_types = ['2TS2WSMS_vary2',# '2TS2WSMS_vary4', 
+load_data_types = ['2TS2WSMS_vary2',  # '2TS2WSMS_vary4', 
                    '2TS2WSMS_vary10', #'2TS2WSMS_vary40', 
                    '2TS2WSMS_vary50', #'2TS2WSMS_vary60', '2TS2WSMS_vary80', 
-                   '2TS2WSMS_vary90', 
-                   #'2TS2WSMS_vary96',
+                   '2TS2WSMS_vary90', #'2TS2WSMS_vary96',
                    '2TS2WSMS_vary98']
 masks = None
 # ----------------------------------------------------------------------------
@@ -69,4 +70,4 @@ for idx, item in enumerate(load_data_types):
 fig.delaxes(fig.get_axes()[0])
 
 # plt.tight_layout()
-plt.savefig(f'code/fig/fig_temp_fr_{load_data_types[0][:-1]}', transparent=True, dpi=500)
+plt.savefig(f'code/fig/fig_temp_fr_{load_data_types[0][:-1]}', transparent=False, dpi=500)

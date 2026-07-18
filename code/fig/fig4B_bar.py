@@ -57,4 +57,4 @@ plt.xlabel('Time (s)')
 
 
 plt.tight_layout()
-plt.savefig('code/fig/fig3_bar.png', transparent=True)
+plt.savefig('code/fig/fig4B_bar.png', transparent=False, dpi=500)

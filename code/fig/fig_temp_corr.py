@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
-from code.func import plt_temp_corr
+from plt_func import plt_corr_mask
 
 
 load_data_type = '2TS2WSMS_vary'
@@ -25,7 +25,6 @@ corr_ends =   [6] * 5 # Sec
 corr_starts = [item - warmup/10 for item in corr_starts]
 corr_ends   = [item - warmup/10 for item in corr_ends]
 
-
 fig, axs = plt.subplots(figsize=(3.5, 4*2), constrained_layout=True)
 
 gs = gridspec.GridSpec(5, 1, figure=fig, hspace=0)
@@ -39,7 +38,7 @@ for idx, item in enumerate([2, 10, 50, 90, 98]):
     
     ax = fig.add_subplot(gs[idx, 0])
     
-    _, ax = plt_temp_corr(avg_hs, fig=fig, ax=ax, corr_inteval=[corr_starts[idx], corr_ends[idx]],
+    _, ax = plt_corr_mask(avg_hs, fig=fig, ax=ax, corr_inteval=[corr_starts[idx], corr_ends[idx]],
                           corr_color=['silver', colours[idx],])
     
     if idx < len(colours)-1:
@@ -52,4 +51,4 @@ for idx, item in enumerate([2, 10, 50, 90, 98]):
 fig.delaxes(fig.get_axes()[0])
 
 # plt.tight_layout()
-plt.savefig(f'code/fig/fig_temp_corr_{load_data_type}', dpi=500, transparent=True)
+plt.savefig(f'code/fig/fig_temp_corr_{load_data_type}', dpi=500, transparent=False)
