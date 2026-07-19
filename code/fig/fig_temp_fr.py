@@ -9,15 +9,15 @@ from func import plt_hs
 
 ### 2TS2WSMS_vary
 # ----------------------------------------------------------------------------
-load_data_types = ['2TS2WSMS_vary2',  # '2TS2WSMS_vary4', 
-                   '2TS2WSMS_vary10', #'2TS2WSMS_vary40', 
-                   '2TS2WSMS_vary50', #'2TS2WSMS_vary60', '2TS2WSMS_vary80', 
-                   '2TS2WSMS_vary90', #'2TS2WSMS_vary96',
-                   '2TS2WSMS_vary98']
-masks = None
+# load_data_types = ['2TS2WSMS_vary2',  # '2TS2WSMS_vary4', 
+#                    '2TS2WSMS_vary10', #'2TS2WSMS_vary40', 
+#                    '2TS2WSMS_vary50', #'2TS2WSMS_vary60', '2TS2WSMS_vary80', 
+#                    '2TS2WSMS_vary90', #'2TS2WSMS_vary96',
+#                    '2TS2WSMS_vary98']
+# masks = None
 # ----------------------------------------------------------------------------
 
-# ### 2TS_vary
+### 2TS_vary
 # ----------------------------------------------------------------------------
 # load_data_types = ['2TS_vary0', '2TS_vary1','2TS_vary2', 
 #                    '2TS_vary3', '2TS_vary4','2TS_vary5',]
@@ -27,10 +27,10 @@ masks = None
 
 ### 2WSMS_vary
 # ----------------------------------------------------------------------------
-# load_data_types = ['2WSMS_mask_vary0', '2WSMS_mask_vary1','2WSMS_mask_vary2', 
-#                    '2WSMS_mask_vary3', '2WSMS_mask_vary4','2WSMS_mask_vary5',]
-# masks = [[[0, 5], [5, 10]], [[0.5, 4.5], [5.5, 9.5]], [[1, 4], [6, 9]],
-#          [[1.5, 3.5], [6.5, 8.5]], [[2, 3], [7, 8]], [[2.5, 3], [7.5, 8]],]
+load_data_types = ['2WSMS_mask_vary0', '2WSMS_mask_vary1','2WSMS_mask_vary2', 
+                   '2WSMS_mask_vary3', '2WSMS_mask_vary4','2WSMS_mask_vary5',]
+masks = [[[0, 5], [5, 10]], [[0.5, 4.5], [5.5, 9.5]], [[1, 4], [6, 9]],
+         [[1.5, 3.5], [6.5, 8.5]], [[2, 3], [7, 8]], [[2.5, 3], [7.5, 8]],]
 # ----------------------------------------------------------------------------
 
 
@@ -55,7 +55,6 @@ for idx, item in enumerate(load_data_types):
     hs = data['hidden_states_512']
     avg_hs = np.mean(hs, axis=0)
     end = avg_hs.shape[0]
-    
     
     ax = fig.add_subplot(gs[idx, 0])
     norm_hs, fig, ax = plt_hs(avg_hs[warmup:end], # masks=masks[idx],

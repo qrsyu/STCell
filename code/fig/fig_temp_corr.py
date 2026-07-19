@@ -13,11 +13,11 @@ colours = [# '#274753',
 
 warmup = 10 # time points
 
-# # Fig 3
+# # Fig 4
 # corr_starts = [5, 4.5, 4, 3.5, 3, 2.5] # Sec
 # corr_ends   = [5, 5.5, 6, 6.5, 7, 7.5] # Sec
 
-# Fig 4
+# Fig 5
 corr_starts = [2.5] * 5 # Sec
 corr_ends =   [6] * 5 # Sec
 
