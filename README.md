@@ -54,7 +54,7 @@ Then run:
 python3 code/2TS_fig.py
 ```
 
-<img src="code/time_exp/time_exp_fr.png" width="300"> <img src="code/time_exp/time_exp_temp_corr.png" width="300">
+<img src="code/time_exp/time_exp_fr.png" width="248"> <img src="code/time_exp/time_exp_temp_corr.png" width="250">
 
 ### Figure 2B (Place cell in square room)
 
@@ -90,7 +90,7 @@ This script generates the data required for training.
 
 Then open `code/spacetime_exp/2WSMS_mask.ipynb` from the repository root and click `Run All`. This notebook generates the hidden-state data, model weights, and Fig. 3Bii.
 
-<img src="code/spacetime_exp/firing_width_vs_time(RealModel-2WSMS_mask)_part1.png" width="300"> <img src="code/spacetime_exp/firing_width_vs_time(RealModel-2WSMS_mask)_part2.png" width="300">
+<img src="code/spacetime_exp/firing_width_vs_time(RealModel-2WSMS_mask)_part1.png" width="200"> <img src="code/spacetime_exp/firing_width_vs_time(RealModel-2WSMS_mask)_part2.png" width="200">
 
 Then run:
 
@@ -112,7 +112,7 @@ To generate Fig 4A iii, uncomment line <u>22-25</u> in `code/fig/fig_temp_fr.py`
 
 To generate Fig 4A iv, open `code/fig/fig4_time_cell_corr_events.ipynb` and `code/fig/fig4_time_cell_corr_time_interval.ipynb` click `Run All`.
 
-<img src="code/fig/fig4_time_cell_corr_events.png" width="300"> <img src="code/fig/fig4_time_cell_corr_time_interval.png" width="350">
+<img src="code/fig/fig4_time_cell_corr_events.png" width="215"> <img src="code/fig/fig4_time_cell_corr_time_interval.png" width="250">
 
 ### Figure 4B
 
@@ -153,17 +153,17 @@ python3 code/fig/fig_temp_corr.py
 
 Open `code/theory_exp/sanity_check.ipynb` from the repository root and click `Run All` to generate Fig. 6A.
 
-<img src="code/theory_exp/Wrc_comparison.png" width="500">
+<img src="code/theory_exp/Wrc_comparison.png" width="300">
 
 Open `code/theory_exp/test_RNN.ipynb` from the repository root and click `Run All` to generate Fig. 6B-D.
 
-<img src="code/theory_exp/theory_rnn_2TS_hs.png" width="300"> <img src="code/theory_exp/theory_exp_temp_corr.png" width="300">
+<img src="code/theory_exp/theory_rnn_2TS_hs.png" width="200"> <img src="code/theory_exp/theory_exp_temp_corr.png" width="200">
 
 <img src="code/theory_exp/Connection_vs_distance.png" width="200"> <img src="code/theory_exp/eigen_spectrum.png" width="350"> <img src="code/theory_exp/singular_values_comparison.png" width="200">
 
 Open `code/theory_exp/high_dim_dist.ipynb` from the repository root and click `Run All` to generate Fig. 6F.
 
-<img src="code/theory_exp/high_dim_dist.png" width="500">
+<img src="code/theory_exp/high_dim_dist.png" width="300">
 
 ## Acknowledgement
 
