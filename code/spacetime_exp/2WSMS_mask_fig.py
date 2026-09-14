@@ -4,7 +4,7 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr
 
-load_data_type = '2WSMS_mask'
+load_data_type = '2WSMS_mask_vel-2-3'
 data = np.load(f'data/{load_data_type}.npy', allow_pickle=True).item()
 num_neuron = 512
 hidden_states = data[f'hidden_states_{num_neuron}']  
