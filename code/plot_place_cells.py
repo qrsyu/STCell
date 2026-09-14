@@ -101,7 +101,10 @@ ratemap_angles, angles, radius = ratemap_to_angle_profile(ratemap)
 occupancy_angles, _, _ = ratemap_to_angle_profile(occupancy[None, :, :])
 SIC, place_cells = SIC_analysis(ratemap_angles, occupancy_angles, threshold=8)
 print(f'Number of place cells: {np.sum(place_cells)} / {args.num_neuron}')
-select_indices = np.where(place_cells)[0]
+place_cells_global_idx = np.where(place_cells)[0]
+# Save the place cell indices back to data dictionary
+data[f'{args.theory}place_cells_{args.num_neuron}_{args.time_start}_{args.time_end}'] = place_cells_global_idx
+np.save(f'data/{args.load_data}.npy', data)
 
 # ===========================================================================================
 # Plot the ratemap
@@ -112,7 +115,7 @@ ratemap[ratemap == 0] = np.nan
 
 # Plot the ratemap
 # select_indices = range(args.num_neuron)
-for imap in tqdm(select_indices):
+for imap in tqdm(place_cells_global_idx):
     fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=300)  
     ax.imshow(ratemap[imap], cmap='jet', aspect='auto')
     ax.axis('off')
@@ -124,7 +127,7 @@ for imap in tqdm(select_indices):
 # Plot a summation of place cells angular contributions
 # ===========================================================================================
 
-ratemap_sum = np.nansum(ratemap[select_indices], axis=0)
+ratemap_sum = np.nansum(ratemap[place_cells_global_idx], axis=0)
 ratemap_sum[ratemap_sum == 0] = np.nan
 
 fig, ax = plt.subplots(1, 1, figsize=(4.9, 4))  

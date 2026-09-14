@@ -282,3 +282,41 @@ def ratemap_to_angle_profile(ratemaps, nbins=18, radius=None):
             where=(counts > 0)
         )
     return ratemap_angle, bin_centers, radius
+
+def time_analysis(hidden, n_shuffles=500, alpha=0.01):
+    n_trials, T, N = hidden.shape
+
+    odd = hidden[0::2].mean(axis=0)    # (T, N)
+    even = hidden[1::2].mean(axis=0)
+
+    def batch_corr(a, b):
+        """Pearson correlation between columns of a and b."""
+        a = a - a.mean(axis=0)
+        b = b - b.mean(axis=0)
+        a_std = a.std(axis=0)
+        b_std = b.std(axis=0)
+        safe = (a_std > 0) & (b_std > 0)
+        corr = np.zeros(a.shape[1])
+        corr[safe] = (a[:, safe] * b[:, safe]).mean(axis=0) / (a_std[safe] * b_std[safe])
+        return corr
+
+    real_corr = batch_corr(odd, even)
+
+    # shuffle: circular shift per trial, all neurons at once
+    rng = np.random.default_rng(42)
+    shuffle_corrs = np.zeros((n_shuffles, N))
+
+    for s in range(n_shuffles):
+        shifts = rng.integers(1, T, size=n_trials)
+        shifted = np.empty_like(hidden)
+        for trial in range(n_trials):
+            shifted[trial] = np.roll(hidden[trial], shifts[trial], axis=0)
+
+        s_odd = shifted[0::2].mean(axis=0)
+        s_even = shifted[1::2].mean(axis=0)
+        shuffle_corrs[s] = batch_corr(s_odd, s_even)
+
+    threshold = np.percentile(shuffle_corrs, 100 * (1 - alpha), axis=0)
+    is_time_cell = real_corr > threshold
+
+    return is_time_cell
