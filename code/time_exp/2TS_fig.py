@@ -5,7 +5,13 @@ import torch
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr
 
-data = np.load('data/2TS.npy', allow_pickle=True).item()
+# Only change these
+name = '_clean'
+time_critical = 12
+
+
+
+data = np.load(f'data/2TS{name}.npy', allow_pickle=True).item()
 hidden_states = data['test_hidden_states']
 if isinstance(hidden_states, torch.Tensor):
     hidden_states = hidden_states.detach().cpu().numpy()
@@ -20,9 +26,9 @@ print(avg_hs.shape)
 fig, ax = plt.subplots(figsize=(4, 3))
 norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
 print(norm_hs.shape)
-ax.set_xlim(2.5, 16)
+# ax.set_xlim(2.5, 16)
 ax.set_xlabel('Time (s)')
-plt.savefig('code/time_exp/time_exp_fr.png', dpi=500, transparent=False, bbox_inches='tight')
+plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
 
 # Sort the norm_hs with maximum firing time
 max_time_pts = np.argmax(norm_hs, axis=0)
@@ -60,7 +66,6 @@ firing_widths = firing_widths / 10
 fig, ax = plt.subplots(figsize=(4,3))
 
 time_start = 3.5
-time_critical = 12 #inputs.shape[1]*(sensory_profile['time']['event_onset'][1]) / 10
 
 plt.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
             firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_critical)], c='salmon', s=10)
@@ -83,4 +88,4 @@ plt.xlabel('Peak firing time (s)')
 plt.ylabel("Firing width (s)")
 plt.tight_layout()
 plt.legend()
-plt.savefig('code/time_exp/time_exp_temp_corr.png', dpi=500, transparent=False, bbox_inches='tight')
+plt.savefig(f'code/time_exp/time_exp_temp_corr{name}.png', dpi=500, transparent=False, bbox_inches='tight')

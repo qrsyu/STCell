@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from func import generate_circular_trajectories
 
-load_data = '2WSMS_mask' 
+load_data = '2WSMS_mask_vel-2-3' 
 
 # ===========================================================================================
 # Set up the arena and sensory input
@@ -20,10 +20,11 @@ load_data = '2WSMS_mask'
 temp_reso, spat_reso = 100, 1 # Temp reso: 100ms; Spatial reso: 1cm
 gym = RatatouGym(temporal_resolution=temp_reso, spatial_resolution=spat_reso)
 
-R_out, R_in = 17, 10
+R_out, R_in = 17, 10 
 gym.init_arena_map(shape="loop", outer_radius=R_out, inner_radius=R_in)
 
-vel_mean, vel_std = 2, 2
+# vel_mean, vel_std = 2, 2 
+vel_mean, vel_std = 2, 3
 behavior_profile = {
                     "name":                   "random_explore",
                     "type":                   "predefined",
@@ -31,7 +32,7 @@ behavior_profile = {
                     "velocity_sd":            vel_std,
                     "random_drift_magnitude": 0.05,
                     "switch_direction_prob":  0.05,
-                    "switch_velocity_prob":   0.1,
+                    "switch_velocity_prob":   0.2, # 0.1,
                     'avoid_boundary_dist':    60
                     }
 
@@ -51,9 +52,16 @@ gym.set_behavior_from_profile(behavior_profile)
 
 arena_map = gym.arena_map
 
-time_pts = 100
+time_pts = 100 
 traj = generate_circular_trajectories(arena_map, R_out, R_in, vel_mean, vel_std,
                     time_points=time_pts, batch_size=1000, visualize=False)
+
+coords = traj['coords']  # (trials, 150, 2)
+center = coords.mean(axis=(0, 1))  # global center
+angles = np.arctan2(coords[:, :, 1] - center[1], coords[:, :, 0] - center[0])
+cumulative = np.unwrap(angles, axis=1)
+laps = (cumulative[:, -1] - cumulative[:, 0]) / (2 * np.pi)  # (trials,)
+print(f'laps per trial: min={laps.min():.2f}, max={laps.max():.2f}, mean={laps.mean():.2f}')
 
 # Generate (Batch size) trial
 gym.trial.new_trial(duration=0, external_traj=traj)
