@@ -3,10 +3,10 @@ from matplotlib import pyplot as plt
 import sys, os
 import torch
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from func import plt_hs, plt_corr
+from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
-name = '_clean'
+name = '_test_longer'
 time_critical = 12
 
 
@@ -15,8 +15,14 @@ data = np.load(f'data/2TS{name}.npy', allow_pickle=True).item()
 hidden_states = data['test_hidden_states']
 if isinstance(hidden_states, torch.Tensor):
     hidden_states = hidden_states.detach().cpu().numpy()
-print(type(hidden_states))
-print(hidden_states.shape)
+print('The shape of hidden_states:', hidden_states.shape)
+    
+    
+    
+is_time_cell = time_analysis(hidden_states)
+print('The number of time cells:', np.sum(is_time_cell), 'out of', len(is_time_cell), 'cells')
+
+
 
 # Averge accross the batch
 avg_hs = np.mean(hidden_states, axis=0)
@@ -26,7 +32,7 @@ print(avg_hs.shape)
 fig, ax = plt.subplots(figsize=(4, 3))
 norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
 print(norm_hs.shape)
-# ax.set_xlim(2.5, 16)
+ax.set_xlim(0, 20)
 ax.set_xlabel('Time (s)')
 plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
 

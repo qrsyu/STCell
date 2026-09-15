@@ -102,9 +102,7 @@ def custom_loss(recon, target, firing_rates, lambda_mse, lambda_r):
 
     # 2. Firing rate regularization term
     reg = torch.sum(torch.sum(firing_rates[0], axis=(0,1))**2 / (B * T)) / N
-
     total_loss = lambda_mse * mse + lambda_r * reg
-    # print(lambda_mse * mse, lambda_r * reg)
     return total_loss, lambda_mse * mse, lambda_r * reg
 
 
