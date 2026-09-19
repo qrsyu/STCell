@@ -7,7 +7,7 @@ from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
 name = '_test_longer'
-time_critical = 12
+time_critical = 16
 
 
 
@@ -32,7 +32,7 @@ print(avg_hs.shape)
 fig, ax = plt.subplots(figsize=(4, 3))
 norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
 print(norm_hs.shape)
-ax.set_xlim(0, 20)
+ax.set_xlim(2, 16)
 ax.set_xlabel('Time (s)')
 plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
 

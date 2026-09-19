@@ -19,19 +19,15 @@ class TimeCell(MMBase):
         super().__init__(arena, **kwargs)
 
         # parameters
-        self.event_onset = kwargs.get('event_onset', [0.25, 0.75]) # in percentage
-        self.event_onset_sigma = kwargs.get('event_onset_sigma', [0.01, 0.01]) # in percentage
-        self.event_width = kwargs.get('event_width', [0.05, 0.05]) # in percentage
-        # self.event_width_sigma = kwargs.get('event_width_sigma', [0.01, 0.01]) # in percentage
-
+        self.event_onset = kwargs.get('event_onset', [0.25, 0.75])               # in percentage
+        self.event_onset_sigma = kwargs.get('event_onset_sigma', [0.01, 0.01])   # in percentage
+        self.event_width = kwargs.get('event_width', [0.05, 0.05])               # in percentage
+        
         self.temp_events = kwargs.get('temp_events', [np.zeros((self.n_cells,)), 
                                                       np.zeros((self.n_cells,))])        
-        # self.magnitude = kwargs.get('mag', 1)
-        # self.mag_func  = kwargs.get('mag_func', lambda x: x)
-        # self.mag_sigma = kwargs.get('mag_sigma', 0.2)
         
         # Gaussian noise
-        self.sigma       = kwargs.get('sigma', 0.5) 
+        self.sigma       = kwargs.get('sigma', 0.5)                              # in absolute 
         self.ssigma      = self._t_to_ts(kwargs.get('ssigma', 0.5)) # sigma of Gaussian noise smoothing 
         
         self.bias        = kwargs.get('bias', 0.0) 
