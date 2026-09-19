@@ -12,9 +12,9 @@ print(f"Using device: {device}")
 fname = '2TS_mask_loss'
 
 data = np.load(f'data/{fname}.npy', allow_pickle=True).item()
-train_inputs = torch.tensor(data['train_inputs'], dtype=torch.float32).to(device)
-train_labels = torch.tensor(data['train_labels'], dtype=torch.float32).to(device)
-test_inputs = torch.tensor(data['test_inputs'], dtype=torch.float32).to(device)
+train_inputs = data['train_inputs'].to(device)
+train_labels = data['train_labels'].to(device)
+test_inputs = data['test_inputs'].to(device)
 
 train_dataset = TensorDataset(train_inputs, train_labels)
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
