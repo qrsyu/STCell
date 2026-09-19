@@ -7,7 +7,7 @@ from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
 name = '_test_longer'
-time_critical = 16
+time_critical = 12
 
 
 
@@ -17,7 +17,7 @@ if isinstance(hidden_states, torch.Tensor):
     hidden_states = hidden_states.detach().cpu().numpy()
 print('The shape of hidden_states:', hidden_states.shape)
     
-    
+
     
 is_time_cell = time_analysis(hidden_states)
 print('The number of time cells:', np.sum(is_time_cell), 'out of', len(is_time_cell), 'cells')
@@ -31,10 +31,13 @@ print(avg_hs.shape)
 # Plot the sorted hidden states
 fig, ax = plt.subplots(figsize=(4, 3))
 norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
-print(norm_hs.shape)
-ax.set_xlim(2, 16)
+ax.axvspan(2.5, 3,   alpha=0.5, color='white', zorder=0)
+ax.axvspan(17.5, 18, alpha=0.5, color='white', zorder=0)
+ax.set_xlim(2, 20)
 ax.set_xlabel('Time (s)')
 plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
+
+
 
 # Sort the norm_hs with maximum firing time
 max_time_pts = np.argmax(norm_hs, axis=0)
@@ -69,13 +72,13 @@ firing_ends = firing_ends / 10
 firing_widths = firing_widths / 10
 
 # Plot the firing widths vs the maximum firing times
-fig, ax = plt.subplots(figsize=(4,3))
+fig2, ax2 = plt.subplots(figsize=(4,3))
 
 time_start = 3.5
 
-plt.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
+ax2.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
             firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_critical)], c='salmon', s=10)
-plt.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts > time_critical)], 
+ax2.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts > time_critical)], 
             firing_widths[(time_start <= max_time_pts) & (max_time_pts > time_critical)], c='skyblue', s=10)
 
 # Plot where not nan firing widths
@@ -86,12 +89,17 @@ firing_starts = firing_starts[not_nan_mask]
 firing_ends = firing_ends[not_nan_mask]
 norm_hs = norm_hs[:, not_nan_mask]
 
-plt_corr(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
-         firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_critical)], fig=fig, ax=ax)
-# plt.ylim(0, 6)
-plt.xlim(2.5, 16)
-plt.xlabel('Peak firing time (s)')
-plt.ylabel("Firing width (s)")
-plt.tight_layout()
-plt.legend()
-plt.savefig(f'code/time_exp/time_exp_temp_corr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
+
+
+fig2, ax2 = plt_corr(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
+            firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_critical)], fig=fig2, ax=ax2)
+ax2.legend()
+
+ax2.axvspan(2.5, 3,   alpha=0.5, color='grey', zorder=0)
+ax2.axvspan(17.5, 18, alpha=0.5, color='grey', zorder=0)
+
+ax2.set_xlim(2.5, 20)
+ax2.set_xlabel('Peak firing time (s)')
+ax2.set_ylabel("Firing width (s)")
+fig2.tight_layout()
+fig2.savefig(f'code/time_exp/time_exp_temp_corr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
