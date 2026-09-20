@@ -105,6 +105,6 @@ data['test_hidden_states'] = hidden_states
 data['train_losses'] = losses
 np.save(f'data/{fname}.npy', data)
 
-os.makedirs('../../model', exist_ok=True)
-torch.save(rnn.state_dict(), f'../../model/{fname}.pth')
+os.makedirs('model', exist_ok=True)
+torch.save(rnn.state_dict(), f'model/{fname}.pth')
 print('Training output saved.')
