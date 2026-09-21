@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, TensorDataset
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 print(f"Using device: {device}")
 
-fname = '2TS_mask_loss'
+fname = '2TS_symmetry'
 
 data = np.load(f'data/{fname}.npy', allow_pickle=True).item()
 train_inputs = data['train_inputs'].to(device)
@@ -102,7 +102,7 @@ print('hidden states:', type(hidden_states), hidden_states.shape)
 
 data['test_outputs'] = test_outputs
 data['test_hidden_states'] = hidden_states
-data['train_losses'] = losses
+data['train_losses'] = losses.cpu().numpy()
 np.save(f'data/{fname}.npy', data)
 
 os.makedirs('model', exist_ok=True)
