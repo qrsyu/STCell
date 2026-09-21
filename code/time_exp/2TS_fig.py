@@ -6,8 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
-name = ''
-time_critical = 12
+name = '_b'
+time_start, time_end = 3.5, 12.5
 
 
 
@@ -74,12 +74,10 @@ firing_widths = firing_widths / 10
 # Plot the firing widths vs the maximum firing times
 fig2, ax2 = plt.subplots(figsize=(4,3))
 
-time_start = 3.5
-
-ax2.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
-            firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_critical)], c='salmon', s=10)
-ax2.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts > time_critical)], 
-            firing_widths[(time_start <= max_time_pts) & (max_time_pts > time_critical)], c='skyblue', s=10)
+ax2.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_end)], 
+            firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_end)], c='salmon', s=10)
+ax2.scatter(max_time_pts[(time_start <= max_time_pts) & (max_time_pts > time_end)], 
+            firing_widths[(time_start <= max_time_pts) & (max_time_pts > time_end)], c='skyblue', s=10)
 
 # Plot where not nan firing widths
 not_nan_mask = ~np.isnan(firing_widths)
@@ -91,14 +89,14 @@ norm_hs = norm_hs[:, not_nan_mask]
 
 
 
-fig2, ax2 = plt_corr(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_critical)], 
-            firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_critical)], fig=fig2, ax=ax2)
+fig2, ax2 = plt_corr(max_time_pts[(time_start <= max_time_pts) & (max_time_pts < time_end)], 
+            firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_end)], fig=fig2, ax=ax2)
 ax2.legend()
 
 ax2.axvspan(2.5, 3,   alpha=0.5, color='grey', zorder=0)
 ax2.axvspan(17.5, 18, alpha=0.5, color='grey', zorder=0)
 
-ax2.set_xlim(2.5, 20)
+# ax2.set_xlim(2.5, 20)
 ax2.set_xlabel('Peak firing time (s)')
 ax2.set_ylabel("Firing width (s)")
 fig2.tight_layout()
