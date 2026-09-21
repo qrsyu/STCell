@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
-name = '_test_longer'
+name = ''
 time_critical = 12
 
 
@@ -33,7 +33,7 @@ fig, ax = plt.subplots(figsize=(4, 3))
 norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
 ax.axvspan(2.5, 3,   alpha=0.5, color='white', zorder=0)
 ax.axvspan(17.5, 18, alpha=0.5, color='white', zorder=0)
-ax.set_xlim(2, 20)
+# ax.set_xlim(2, 20)
 ax.set_xlabel('Time (s)')
 plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
 
