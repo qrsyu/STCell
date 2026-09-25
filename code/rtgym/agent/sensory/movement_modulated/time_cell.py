@@ -42,14 +42,12 @@ class TimeCell(MMBase):
         
         # Check temporal events onsets
         # ----------------------------------------------------------------------
-        assert isinstance(self.event_onset, list), "onsets must be a list"
         assert len(self.event_onset) >= 1, "onsets must contain at least one values"
         assert all(0 <= onset <= 1 for onset in self.event_onset), "onsets must between 0 and 1"
         # ----------------------------------------------------------------------
         
         # Check temporal events widths
         # ----------------------------------------------------------------------
-        assert isinstance(self.event_width, list), "widths must be a list"
         assert len(self.event_width) >= 1, "widths must contain at least one values"
         assert all(0 <= width <= 1 for width in self.event_width), "widths must between 0 and 1"
         # ----------------------------------------------------------------------
