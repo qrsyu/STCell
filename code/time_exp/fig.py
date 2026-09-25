@@ -7,7 +7,7 @@ from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
 name = '_b'
-time_start, time_end = 3.5, 12.5
+time_start, time_end = 3, 12.5
 
 
 
