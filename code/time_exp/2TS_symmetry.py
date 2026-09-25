@@ -1,10 +1,12 @@
 import torch
-import nn4n.nn
 import sys, os
 import numpy as np
 from tqdm import tqdm
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+code_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, code_dir)
+sys.path.insert(0, os.path.join(code_dir, 'nn4n'))
 from func import custom_loss
+import nn4n.nn
 from torch.utils.data import DataLoader, TensorDataset
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -67,7 +69,7 @@ optimizer = torch.optim.Adam(rnn.parameters(), lr=0.0005)
 
 rnn.train()
 losses = []
-for epoch in tqdm(range(5000)):
+for epoch in tqdm(range(600)):
 
     for batch_inputs, batch_labels in train_loader:
         optimizer.zero_grad()
