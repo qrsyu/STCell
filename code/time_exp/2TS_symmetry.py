@@ -69,7 +69,7 @@ optimizer = torch.optim.Adam(rnn.parameters(), lr=0.0005)
 
 rnn.train()
 losses = []
-for epoch in tqdm(range(600)):
+for epoch in tqdm(range(1000)):
 
     for batch_inputs, batch_labels in train_loader:
         optimizer.zero_grad()
