@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, TensorDataset
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 print(f"Using device: {device}")
 
-fname = '2TS_symmetry'
+fname = '2TS_symmetry_M2'
 
 data = np.load(f'data/{fname}.npy', allow_pickle=True).item()
 train_inputs = data['train_inputs'].to(device)
@@ -69,7 +69,7 @@ optimizer = torch.optim.Adam(rnn.parameters(), lr=0.0005)
 
 rnn.train()
 losses = []
-for epoch in tqdm(range(1000)):
+for epoch in tqdm(range(3000)):
 
     for batch_inputs, batch_labels in train_loader:
         optimizer.zero_grad()
