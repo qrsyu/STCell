@@ -22,11 +22,11 @@ train_dataset = TensorDataset(train_inputs, train_labels)
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 
-
+D = 100
 model_cfg = {
-            "input_dim":    100,
+            "input_dim":    D,
             "hidden_dim":   512,
-            'output_dim':   100,
+            'output_dim':   D,
             "alpha":        0.01,
             "learn_alpha":  False,
             "preact_noise": 0.1,
@@ -104,7 +104,7 @@ print('hidden states:', type(hidden_states), hidden_states.shape)
 
 data['test_outputs'] = test_outputs
 data['test_hidden_states'] = hidden_states
-data['train_losses'] = losses.cpu().numpy()
+data['train_losses'] = np.asarray(losses)
 np.save(f'data/{fname}.npy', data)
 
 os.makedirs('model', exist_ok=True)

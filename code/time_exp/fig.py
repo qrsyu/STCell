@@ -6,8 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
-name = '_b'
-time_start, time_end = 3, 12.5
+name = '_a'
+time_start, time_end = 3.2, 12.5
 
 
 

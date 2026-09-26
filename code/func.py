@@ -110,15 +110,15 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, return_idx=False):
 
     time_points = hs.shape[0]
 
-    # # Select neurons with mean firing rate > 0.1
-    # mean_fr = hs.mean(axis=0)
-    # # Get the index where mean_fr > min_fr
-    # mask = mean_fr > min_fr
-    # neuron_indices = np.where(mask)[0]
-    
-    # Get the index where each neuron has at least one time point with firing rate > 0.1
-    mask = np.any(hs > min_fr, axis=0)
+    # Select neurons with mean firing rate > 0.1
+    mean_fr = hs.mean(axis=0)
+    # Get the index where mean_fr > min_fr
+    mask = mean_fr > min_fr
     neuron_indices = np.where(mask)[0]
+    
+    # # Get the index where each neuron has at least one time point with firing rate > 0.1
+    # mask = np.any(hs > min_fr, axis=0)
+    # neuron_indices = np.where(mask)[0]
     
     select_hs = hs[:, neuron_indices]
     del hs
