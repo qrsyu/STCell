@@ -17,6 +17,7 @@ data = np.load(f'data/{fname}.npy', allow_pickle=True).item()
 train_inputs = data['train_inputs'].to(device)
 train_labels = data['train_labels'].to(device)
 test_inputs = data['test_inputs'].to(device)
+test_labels = data['test_labels'].to(device)
 
 train_dataset = TensorDataset(train_inputs, train_labels)
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
@@ -67,24 +68,34 @@ optimizer = torch.optim.Adam(rnn.parameters(), lr=0.0005)
 
 
 
-rnn.train()
 losses = []
-for epoch in tqdm(range(3000)):
-
-    for batch_inputs, batch_labels in train_loader:
+for epoch in tqdm(range(1000)):
+    rnn.train()
+    for bx, by in train_loader:
         optimizer.zero_grad()
-        batch_outputs, batch_hidden = rnn(batch_inputs)
-        loss, loss1, loss2 = custom_loss(
-                                batch_outputs, batch_labels, batch_hidden,
+        out, hid = rnn(bx)
+        loss, _, _ = custom_loss(out, by, hid,
                                 lambda_mse=1, lambda_r=0.0001)
-        loss.backward()
-        optimizer.step()
+        loss.backward(); optimizer.step()
         losses.append(loss.item())
-        
-    if epoch % 500 == 0:
-        print(f'Epoch {epoch} Loss {loss.item()}')
-        print(loss1, loss2)
-    if  losses[-1] < 0.05 and abs(losses[-1] - losses[-50]) < 1e-4: 
+    
+    # # Add testing evaluation every 500 epochs
+    # if epoch % 500 == 0:
+    #     rnn.eval()
+    #     with torch.no_grad():
+    #         test_out, _ = rnn(test_inputs)
+    #         ev2_mse = ((test_out - test_labels)**2)[w2].mean().item()
+    #         base    = ((4.0 - test_labels)**2)[w2].mean().item()
+    #     if ev2_mse < best - 1e-4:
+    #         best, wait = ev2_mse, 0
+    #         torch.save(rnn.state_dict(), f'model/{fname}_best.pth')
+    #     else:
+    #         wait += 10
+    #         if wait > 1000:
+    #             print(f"Early stopping at epoch {epoch} due to no improvement in ev2_mse.")
+    #             break
+    
+    if  losses[-1] < 0.05 and abs(losses[-1] - losses[-50]) < 1e-3: 
         print("Early stopping due to convergence.")
         break
 print("Training complete.")
