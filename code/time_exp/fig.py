@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
-name = '_clean'
+name = ''
 time_start, time_end = 3.2, 12.5
 
 
@@ -31,11 +31,12 @@ print(avg_hs.shape)
 # Plot the sorted hidden states
 fig, ax = plt.subplots(figsize=(4, 3))
 norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
-ax.axvspan(2.5, 3,   alpha=0.5, color='white', zorder=0)
-ax.axvspan(17.5, 18, alpha=0.5, color='white', zorder=0)
+
+# ax.axvspan(2.5, 3,   alpha=0.5, color='white', zorder=0)
+# ax.axvspan(17.5, 18, alpha=0.5, color='white', zorder=0)
 # ax.set_xlim(2, 20)
 ax.set_xlabel('Time (s)')
-plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
+plt.savefig(f'code/time_exp/time_exp_fr{name}.png', dpi=500, transparent=True, bbox_inches='tight')
 
 
 
@@ -93,11 +94,11 @@ fig2, ax2 = plt_corr(max_time_pts[(time_start <= max_time_pts) & (max_time_pts <
             firing_widths[(time_start <= max_time_pts) & (max_time_pts < time_end)], fig=fig2, ax=ax2)
 ax2.legend()
 
-ax2.axvspan(2.5, 3,   alpha=0.5, color='grey', zorder=0)
-ax2.axvspan(17.5, 18, alpha=0.5, color='grey', zorder=0)
+# ax2.axvspan(2.5, 3,   alpha=0.5, color='grey', zorder=0)
+# ax2.axvspan(17.5, 18, alpha=0.5, color='grey', zorder=0)
+ax2.set_xlim(0, 20)
 
-# ax2.set_xlim(2.5, 20)
 ax2.set_xlabel('Peak firing time (s)')
 ax2.set_ylabel("Firing width (s)")
 fig2.tight_layout()
-fig2.savefig(f'code/time_exp/time_exp_temp_corr{name}.png', dpi=500, transparent=False, bbox_inches='tight')
+fig2.savefig(f'code/time_exp/time_exp_temp_corr{name}.png', dpi=500, transparent=True, bbox_inches='tight')
