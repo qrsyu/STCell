@@ -106,20 +106,20 @@ def custom_loss(recon, target, firing_rates, lambda_mse, lambda_r):
     return total_loss, lambda_mse * mse, lambda_r * reg
 
 
-def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, 
+def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None, cmap='jet', aspect='auto',
            return_idx=False, use_max=False):
 
     time_points = hs.shape[0]
     
     if not use_max:
-        # Select neurons with mean firing rate > 0.1
+        # Select neurons with mean firing rate > min_fr
         mean_fr = hs.mean(axis=0)
         # Get the index where mean_fr > min_fr
         mask = mean_fr > min_fr
         neuron_indices = np.where(mask)[0]
     else:
         print('Using max firing rate to select neurons...')
-        # Get the index where each neuron has at least one time point with firing rate > 0.1
+        # Get the index where each neuron has at least one time point with firing rate > min_fr
         mask = np.any(hs > min_fr, axis=0)
         neuron_indices = np.where(mask)[0]
     
@@ -127,8 +127,6 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None,
     del hs
 
     # Normalize the hs along time points (Sure to be correct!)
-    # norm_hs = select_hs / np.linalg.norm(select_hs, axis=0, keepdims=True)
-    # 0-1 Normalise method 2
     norm_hs = np.zeros_like(select_hs)
     for n in range(select_hs.shape[1]):
         norm_hs[:, n] = (select_hs[:, n]-np.min(select_hs[:, n]))/(np.max(select_hs[:, n])-np.min(select_hs[:, n]))
@@ -139,9 +137,9 @@ def plt_hs(hs, min_fr=0.1, masks=None, fig=None, ax=None,
     sorted_neuron_indices = np.argsort(max_time)
     norm_hs = norm_hs[:, sorted_neuron_indices]
     num_neurons = norm_hs.shape[1]
-    
+
     # Plot the normalized hs
-    ax.imshow(norm_hs.T, aspect='auto', cmap='jet',  
+    ax.imshow(norm_hs.T, aspect=aspect, cmap=cmap,  
               extent=[0, time_points/10, 0, num_neurons]
               )
     # ax.set_xlabel('Time (s)')

@@ -1,20 +1,17 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import sys, os
-import torch
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from func import plt_hs, plt_corr, time_analysis
 
 # Only change these
-name = ''
+name = '_symmetry_M2_numpy'
 time_start, time_end = 3.2, 12.5
 
 
 
 data = np.load(f'data/2TS{name}.npy', allow_pickle=True).item()
 hidden_states = data['test_hidden_states']
-if isinstance(hidden_states, torch.Tensor):
-    hidden_states = hidden_states.detach().cpu().numpy()
 print('The shape of hidden_states:', hidden_states.shape)
     
 
@@ -25,12 +22,12 @@ print('The number of time cells:', np.sum(is_time_cell), 'out of', len(is_time_c
 
 
 # Averge accross the batch
-avg_hs = np.mean(hidden_states, axis=0)
+avg_hs = hidden_states[0] # np.mean(hidden_states, axis=0)
 print(avg_hs.shape)
 
 # Plot the sorted hidden states
 fig, ax = plt.subplots(figsize=(4, 3))
-norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax)
+norm_hs, fig, ax = plt_hs(avg_hs, min_fr=0.1, fig=fig, ax=ax, use_max=True)
 
 # ax.axvspan(2.5, 3,   alpha=0.5, color='white', zorder=0)
 # ax.axvspan(17.5, 18, alpha=0.5, color='white', zorder=0)
